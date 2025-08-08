@@ -7,9 +7,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- Include DataTables CSS and JS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.7/css/dataTables.dataTables.css">
+    <script type="text/javascript" src="https://cdn.datatables.net/2.0.7/js/dataTables.js"></script>
+    
     <style>
         body {
             font-family: 'Roboto';
@@ -234,7 +239,7 @@
         <h2>Performance Comparison (SR (%))</h2>
         
         <h3>Regular scene</h3>
-        <table class="datatable" id="table1">
+        <table id="table1" class="datatable">
             <thead>
                 <tr>
                     <th colspan="2">Method</th>
@@ -816,7 +821,7 @@
         </table>
         
         <h3>Dynamic Light scene</h3>
-        <table class="datatable" id="table2">
+        <table id="table2" class="datatable">
             <thead>
                 <tr>
                     <th colspan="2">Method</th>
@@ -1398,7 +1403,7 @@
         </table>
         
         <h3>Noisy (+ Dyanmic Light) scene</h3>
-        <table id="my-table" class="display">
+        <table id="table3" class="datatable">
             <thead>
                 <tr>
                     <th colspan="2">Method</th>
@@ -1980,7 +1985,7 @@
         </table>
         
         <h3>Occlusion (+ Dynamic Light) scene</h3>
-        <table id="my-table" class="display">
+        <table id="table4" class="datatable">
             <thead>
                 <tr>
                     <th colspan="2">Method</th>
