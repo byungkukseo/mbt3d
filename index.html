@@ -100,8 +100,7 @@
     </style>
     <script type="text/javascript">
     $(document).ready(function () {
-        $('#my-table1').DataTable();
-        $('#my-table2').DataTable();        
+        $('#my-table').DataTable();    
     });
     </script>
     <script>
@@ -250,7 +249,7 @@
         <h2>Performance Comparison (SR (%))</h2>
         
         <h3>Regular scene</h3>
-        <table>
+        <table id="my-table">
             <thead>
                 <tr>
                     <th colspan="2">Method</th>
@@ -832,7 +831,7 @@
         </table>
         
         <h3>Dynamic Light scene</h3>
-        <table id="my-table2" class="display">
+        <table id="my-table">
             <thead>
                 <tr>
                     <th colspan="2">Method</th>
