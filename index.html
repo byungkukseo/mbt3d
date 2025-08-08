@@ -1,76 +1,2581 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>CSV to HTML Table</title>
-    <meta name="author" content="Derek Eder">
-    <meta content="Display any CSV file as a searchable, filterable, pretty HTML table">
-
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
-        crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
-</head>
-
-<body>
-    <div class="container-fluid">
-        <main class="row">
-            <div class="col">
-                <h1>CSV to HTML Table</h1>
-
-                <p>Display any CSV file as a searchable, filterable, pretty HTML table. Done in 100% JavaScript. <a
-                        href="https://github.com/derekeder/csv-to-html-table">Code
-                        on GitHub</a>.</p>
-
-                <p> Here's a table of Health Clinics from the <a href="https://data.cityofchicago.org/browse?q=health%20clinic&sortBy=relevance&utf8=%E2%9C%93">City
-                        of Chicago Data Portal</a>.
-                </p>
-
-                <div id="table-container"></div>
-            </div>
-        </main>
-        <footer class="row">
-            <div class="col">
-                <hr>
-                <p class="text-right"><a href="https://github.com/derekeder/csv-to-html-table">CSV to HTML Table</a> by
-                    <a href="http://derekeder.com">Derek
-                        Eder</a></p>
-            </div>
-        </footer>
-    </div>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.2.1/js/bootstrap.bundle.min.js"></script>
-    <script src="js/jquery.csv.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
-    <script src="js/csv_to_html_table.js"></script>
-
-    <script>
-        function format_link(link) {
-            if (link)
-                return "<a href='" + link + "' target='_blank'>" + link + "</a>";
-            else return "";
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Tracking Methods Comparison</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto';
+            font-weight: 300;
+            font-size: 13px;
+            line-height: 130%;
+            background-color: #FFFFFF;
+            color: #000000;
+            margin-left: 200px; /* Add left margin */
+            margin-right: 200px; /* Add right margin */
         }
-
-        CsvToHtmlTable.init({
-            csv_path: "sota_evaluation_250717.csv",
-            element: "table-container",
-            allow_download: true,
-            csv_options: {
-                separator: ",",
-                delimiter: '"'
-            },
-            datatables_options: {
-                paging: false
-            },
-            custom_formatting: [
-                [4, format_link]
-            ]
-        });
+        h1 {
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eaecef;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid #dfe2e5;
+            text-align: center;
+        }
+        th {
+            background-color: #f6f8fa;
+        }
+        .section-header {
+            background-color: #f6f8fa;
+            font-weight: bold;
+            text-align: left;
+        }
+        .method-cell {
+            text-align: left;
+        }
+        .best-score {
+            font-weight: bold;
+        }
+        .well-textured {
+            background-color: #C0C0C0;
+        }
+        .weakly-textured {
+            background-color: #C0C0C0;
+        }
+        .very-distinct {
+            background-color: #C0C0C0;
+        }
+        .less-distinct {
+            background-color: #C0C0C0;
+        }
+        .legend {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f8f8;
+            border: 1px solid #dfe2e5;
+            border-radius: 3px;
+        }
+        .legend-item {
+            display: inline-block;
+            margin-right: 20px;
+        }
+        .legend-color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .scale-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #000;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            display: none;
+          }
+        
+          @media (max-width: 768px) {
+            .scale-bar {
+              display: block;
+            }
+          }
+    </style>
+        <script>
+      window.addEventListener('resize', function() {
+        const scaleBar = document.querySelector('.scale-bar');
+        if (window.innerWidth <= 768) {
+          scaleBar.style.display = 'block';
+        } else {
+          scaleBar.style.display = 'none';
+        }
+      });
     </script>
-</body>
+    
+    <script type="text/javascript">
+    $(document).ready(function () {
+      $('.datatable').DataTable();
+    });
+    </script>
+</head>
+<body>
+    <h1>Monocular Model-Based 3D Object Tracking Methods</h1>
+    
+    <div class="legend">
+        <h3>Object Appearance Legend</h3>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #C0C0C0;"></div>
+            <span>Category Classification</span>
+        </div>
+    </div>
 
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">Appearance</th>
+                    <th>Ape</th>
+                    <th>Soda</th>
+                    <th>Vise</th>
+                    <th>Soup</th>
+                    <th>Camera</th>
+                    <th>Can</th>
+                    <th>Cat</th>
+                    <th>Clown</th>
+                    <th>Cube</th>
+                    <th>Driller</th>
+                    <th>Duck</th>
+                    <th>Egg</th>
+                    <th>Glue</th>
+                    <th>Iron</th>
+                    <th>Candy</th>
+                    <th>Lamp</th>
+                    <th>Phone</th>
+                    <th>Squirrel</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="2">[tjaden2019region]</td>
+                    <td>well-textured</td>
+                    <td></td>
+                    <td class="well-textured"></td>
+                    <td></td>
+                    <td class="well-textured"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="well-textured"></td>
+                    <td class="well-textured"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="well-textured"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>weakly-textured</td>
+                    <td class="weakly-textured"></td>
+                    <td></td>
+                    <td class="weakly-textured"></td>
+                    <td></td>
+                    <td class="weakly-textured"></td>
+                    <td class="weakly-textured"></td>
+                    <td class="weakly-textured"></td>
+                    <td></td>
+                    <td></td>
+                    <td class="weakly-textured"></td>
+                    <td class="weakly-textured"></td>
+                    <td class="weakly-textured"></td>
+                    <td class="weakly-textured"></td>
+                    <td class="weakly-textured"></td>
+                    <td></td>
+                    <td class="weakly-textured"></td>
+                    <td class="weakly-textured"></td>
+                    <td class="weakly-textured"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td rowspan="2">[sun2021robust]</td>
+                    <td>very-distinct</td>
+                    <td class="very-distinct"></td>
+                    <td class="very-distinct"></td>
+                    <td class="very-distinct"></td>
+                    <td class="very-distinct"></td>
+                    <td></td>
+                    <td></td>
+                    <td class="very-distinct"></td>
+                    <td class="very-distinct"></td>
+                    <td></td>
+                    <td class="very-distinct"></td>
+                    <td class="very-distinct"></td>
+                    <td></td>
+                    <td></td>
+                    <td class="very-distinct"></td>
+                    <td class="very-distinct"></td>
+                    <td></td>
+                    <td></td>
+                    <td class="very-distinct"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>less-distinct</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="less-distinct"></td>
+                    <td class="less-distinct"></td>
+                    <td></td>
+                    <td></td>
+                    <td class="less-distinct"></td>
+                    <td class="less-distinct"></td>
+                    <td></td>
+                    <td class="less-distinct"></td>
+                    <td class="less-distinct"></td>
+                    <td></td>
+                    <td></td>
+                    <td class="less-distinct"></td>
+                    <td class="less-distinct"></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <!-- Method comparison tables -->
+        <h2>Performance Comparison (SR (%))</h2>
+        
+        <h3>Regular scene</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">Method</th>
+                    <th>Ape</th>
+                    <th>Soda</th>
+                    <th>Vise</th>
+                    <th>Soup</th>
+                    <th>Camera</th>
+                    <th>Can</th>
+                    <th>Cat</th>
+                    <th>Clown</th>
+                    <th>Cube</th>
+                    <th>Driller</th>
+                    <th>Duck</th>
+                    <th>Egg</th>
+                    <th>Glue</th>
+                    <th>Iron</th>
+                    <th>Candy</th>
+                    <th>Lamp</th>
+                    <th>Phone</th>
+                    <th>Squirrel</th>
+                    <th>Avg</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>G. Wang et al.</td>
+                    <td>VC (2015)</td>
+                    <td>13.3 </td>
+                    <td>13.3 </td>
+                    <td>16.1 </td>
+                    <td>16.0 </td>
+                    <td>15.1 </td>
+                    <td>14.6 </td>
+                    <td>19.3 </td>
+                    <td>14.0 </td>
+                    <td>13.9 </td>
+                    <td>16.6 </td>
+                    <td>16.5 </td>
+                    <td>11.0 </td>
+                    <td>13.4 </td>
+                    <td>15.6 </td>
+                    <td>8.7 </td>
+                    <td>15.9 </td>
+                    <td>13.5 </td>
+                    <td>18.2 </td>
+                    <td>14.7  </td>
+                </tr>
+                <tr>
+                    <td>G. Wang et al.</td>
+                    <td>VC (2015)</td>
+                    <td>5.5 </td>
+                    <td>3.9 </td>
+                    <td>5.9 </td>
+                    <td>7.9 </td>
+                    <td>5.5 </td>
+                    <td>4.7 </td>
+                    <td>16.8 </td>
+                    <td>3.6 </td>
+                    <td>3.8 </td>
+                    <td>6.2 </td>
+                    <td>7.2 </td>
+                    <td>2.3 </td>
+                    <td>2.8 </td>
+                    <td>5.8 </td>
+                    <td>1.2 </td>
+                    <td>3.8 </td>
+                    <td>4.6 </td>
+                    <td>12.9 </td>
+                    <td>5.8  </td>
+                </tr>
+                <tr>
+                    <td>H. Tjaden et al.</td>
+                    <td>ICCV (2017)</td>
+                    <td>62.1 </td>
+                    <td>30.5 </td>
+                    <td>95.8 </td>
+                    <td>66.2 </td>
+                    <td>61.6 </td>
+                    <td>81.7 </td>
+                    <td>96.7 </td>
+                    <td>89.1 </td>
+                    <td>44.1 </td>
+                    <td>87.7 </td>
+                    <td>74.9 </td>
+                    <td>50.9 </td>
+                    <td>20.2 </td>
+                    <td>68.4 </td>
+                    <td>20.0 </td>
+                    <td>92.3 </td>
+                    <td>64.9 </td>
+                    <td>98.5 </td>
+                    <td>67.0  </td>
+                </tr>
+                <tr>
+                    <td>B. Wang et al.</td>
+                    <td>MTAP (2019)</td>
+                    <td>22.4 </td>
+                    <td>19.4 </td>
+                    <td>22.9 </td>
+                    <td>21.3 </td>
+                    <td>23.3 </td>
+                    <td>19.8 </td>
+                    <td>20.7 </td>
+                    <td>23.1 </td>
+                    <td>22.7 </td>
+                    <td>22.4 </td>
+                    <td>20.5 </td>
+                    <td>21.2 </td>
+                    <td>19.7 </td>
+                    <td>22.2 </td>
+                    <td>21.0 </td>
+                    <td>23.0 </td>
+                    <td>24.9 </td>
+                    <td>22.6 </td>
+                    <td>21.8  </td>
+                </tr>
+                <tr>
+                    <td>H. Tjaden et al.</td>
+                    <td>TPAMI (2019)</td>
+                    <td>85.0 </td>
+                    <td>39.0 </td>
+                    <td>98.9 </td>
+                    <td>82.4 </td>
+                    <td>79.9 </td>
+                    <td>87.6 </td>
+                    <td>95.9 </td>
+                    <td>93.0 </td>
+                    <td>86.8 </td>
+                    <td>74.6 </td>
+                    <td>38.9 </td>
+                    <td>81.0 </td>
+                    <td>46.8 </td>
+                    <td>97.5 </td>
+                    <td>80.7 </td>
+                    <td>99.4 </td>
+                    <td>93.3 </td>
+                    <td>78.1 </td>
+                    <td>79.9  </td>
+                </tr>
+                <tr>
+                    <td>L. Zhong et al.</td>
+                    <td>IJCV (2019)</td>
+                    <td>82.6 </td>
+                    <td>40.1 </td>
+                    <td>92.6 </td>
+                    <td>85.0 </td>
+                    <td>82.8 </td>
+                    <td>87.2 </td>
+                    <td>98.0 </td>
+                    <td>92.9 </td>
+                    <td>81.3 </td>
+                    <td>84.5 </td>
+                    <td>83.3 </td>
+                    <td>76.2 </td>
+                    <td>56.1 </td>
+                    <td>84.6 </td>
+                    <td>57.6 </td>
+                    <td>90.5 </td>
+                    <td>82.6 </td>
+                    <td>95.6 </td>
+                    <td>80.8  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>PG (2020)</td>
+                    <td>91.9 </td>
+                    <td>44.8 </td>
+                    <td>99.7 </td>
+                    <td>89.1 </td>
+                    <td>89.3 </td>
+                    <td>90.6 </td>
+                    <td>97.4 </td>
+                    <td>95.9 </td>
+                    <td>83.9 </td>
+                    <td>97.6 </td>
+                    <td>91.8 </td>
+                    <td>84.4 </td>
+                    <td>59.0 </td>
+                    <td>92.5 </td>
+                    <td>74.3 </td>
+                    <td>97.4 </td>
+                    <td>86.4 </td>
+                    <td>99.7 </td>
+                    <td>86.9  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>CGF (2020)</td>
+                    <td>91.9 </td>
+                    <td>44.8 </td>
+                    <td>99.7 </td>
+                    <td>89.1 </td>
+                    <td>89.3 </td>
+                    <td>90.6 </td>
+                    <td>97.4 </td>
+                    <td>95.9 </td>
+                    <td>83.9 </td>
+                    <td>97.6 </td>
+                    <td>91.8 </td>
+                    <td>84.4 </td>
+                    <td>59.0 </td>
+                    <td>92.5 </td>
+                    <td>74.3 </td>
+                    <td>97.4 </td>
+                    <td>86.4 </td>
+                    <td>99.7 </td>
+                    <td>86.9  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>CGF (2020)</td>
+                    <td>93.0 </td>
+                    <td>55.2 </td>
+                    <td>99.3 </td>
+                    <td>85.4 </td>
+                    <td>96.1 </td>
+                    <td>93.9 </td>
+                    <td>98.0 </td>
+                    <td>98.2 </td>
+                    <td>89.7 </td>
+                    <td>89.1 </td>
+                    <td>66.5 </td>
+                    <td>91.3 </td>
+                    <td>60.6 </td>
+                    <td>98.6 </td>
+                    <td>95.6 </td>
+                    <td>99.6 </td>
+                    <td>95.6 </td>
+                    <td>79.5 </td>
+                    <td>88.1  </td>
+                </tr>
+                <tr>
+                    <td>L. Zhong et al.</td>
+                    <td>TIP (2020)</td>
+                    <td>88.8 </td>
+                    <td>41.3 </td>
+                    <td>94.0 </td>
+                    <td>85.9 </td>
+                    <td>86.9 </td>
+                    <td>89.0 </td>
+                    <td>98.5 </td>
+                    <td>93.7 </td>
+                    <td>83.1 </td>
+                    <td>87.3 </td>
+                    <td>86.2 </td>
+                    <td>78.5 </td>
+                    <td>58.6 </td>
+                    <td>86.3 </td>
+                    <td>57.9 </td>
+                    <td>91.7 </td>
+                    <td>85.0 </td>
+                    <td>96.2 </td>
+                    <td>82.7  </td>
+                </tr>
+                <tr>
+                    <td>M. Stoiber et al.</td>
+                    <td>ACCV (2020)</td>
+                    <td>96.4 </td>
+                    <td>53.2 </td>
+                    <td>98.8 </td>
+                    <td>93.9 </td>
+                    <td>93.0 </td>
+                    <td>92.7 </td>
+                    <td>99.7 </td>
+                    <td>97.1 </td>
+                    <td>92.5 </td>
+                    <td>92.5 </td>
+                    <td>93.7 </td>
+                    <td>88.5 </td>
+                    <td>70.0 </td>
+                    <td>92.1 </td>
+                    <td>78.8 </td>
+                    <td>95.5 </td>
+                    <td>92.5 </td>
+                    <td>99.6 </td>
+                    <td>90.0  </td>
+                </tr>
+                <tr>
+                    <td>X. Sun et al.</td>
+                    <td>TCSVT (2021)</td>
+                    <td>67.2 </td>
+                    <td>25.2 </td>
+                    <td>80.7 </td>
+                    <td>27.6 </td>
+                    <td>80.2 </td>
+                    <td>56.6 </td>
+                    <td>70.1 </td>
+                    <td>52.9 </td>
+                    <td>17.3 </td>
+                    <td>85.3 </td>
+                    <td>37.8 </td>
+                    <td>53.0 </td>
+                    <td>36.3 </td>
+                    <td>57.9 </td>
+                    <td>24.6 </td>
+                    <td>68.0 </td>
+                    <td>82.6 </td>
+                    <td>86.7 </td>
+                    <td>56.1  </td>
+                </tr>
+                <tr>
+                    <td>X. Sun et al.</td>
+                    <td>TCSVT (2021)</td>
+                    <td>93.0 </td>
+                    <td>55.2 </td>
+                    <td>99.3 </td>
+                    <td>85.4 </td>
+                    <td>96.1 </td>
+                    <td>93.9 </td>
+                    <td>98.0 </td>
+                    <td>95.6 </td>
+                    <td>79.5 </td>
+                    <td>98.2 </td>
+                    <td>89.7 </td>
+                    <td>89.1 </td>
+                    <td>66.5 </td>
+                    <td>91.3 </td>
+                    <td>60.6 </td>
+                    <td>98.6 </td>
+                    <td>95.6 </td>
+                    <td>99.6 </td>
+                    <td>88.1  </td>
+                </tr>
+                <tr>
+                    <td>X. Sun et al.</td>
+                    <td>TCSVT (2021)</td>
+                    <td>91.9 </td>
+                    <td>44.8 </td>
+                    <td>99.7 </td>
+                    <td>89.1 </td>
+                    <td>89.3 </td>
+                    <td>90.6 </td>
+                    <td>97.4 </td>
+                    <td>97.6 </td>
+                    <td>91.8 </td>
+                    <td>84.4 </td>
+                    <td>59.0 </td>
+                    <td>92.5 </td>
+                    <td>74.3 </td>
+                    <td>97.4 </td>
+                    <td>86.4 </td>
+                    <td>99.7 </td>
+                    <td>95.9 </td>
+                    <td>83.9 </td>
+                    <td>86.9  </td>
+                </tr>
+                <tr>
+                    <td>J. Li et al.</td>
+                    <td>C&amp;G (2021)</td>
+                    <td>90.0 </td>
+                    <td>47.4 </td>
+                    <td>88.4 </td>
+                    <td>82.1 </td>
+                    <td>82.9 </td>
+                    <td>77.9 </td>
+                    <td>94.2 </td>
+                    <td>89.3 </td>
+                    <td>79.2 </td>
+                    <td>71.0 </td>
+                    <td>86.3 </td>
+                    <td>79.3 </td>
+                    <td>48.5 </td>
+                    <td>66.5 </td>
+                    <td>55.9 </td>
+                    <td>77.1 </td>
+                    <td>77.6 </td>
+                    <td>92.0 </td>
+                    <td>77.0  </td>
+                </tr>
+                <tr>
+                    <td>J. Li et al.</td>
+                    <td>JCST (2021)</td>
+                    <td>92.8 </td>
+                    <td>42.6 </td>
+                    <td>96.8 </td>
+                    <td>87.5 </td>
+                    <td>90.7 </td>
+                    <td>86.2 </td>
+                    <td>99.0 </td>
+                    <td>96.9 </td>
+                    <td>86.8 </td>
+                    <td>94.6 </td>
+                    <td>90.4 </td>
+                    <td>87.0 </td>
+                    <td>57.6 </td>
+                    <td>88.7 </td>
+                    <td>59.9 </td>
+                    <td>96.5 </td>
+                    <td>90.6 </td>
+                    <td>99.5 </td>
+                    <td>85.8  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>TVCG (2022)</td>
+                    <td>94.6 </td>
+                    <td>49.4 </td>
+                    <td>99.5 </td>
+                    <td>91.0 </td>
+                    <td>93.7 </td>
+                    <td>96.0 </td>
+                    <td>97.8 </td>
+                    <td>98.2 </td>
+                    <td>93.4 </td>
+                    <td>90.3 </td>
+                    <td>64.4 </td>
+                    <td>94.0 </td>
+                    <td>79.0 </td>
+                    <td>98.8 </td>
+                    <td>92.9 </td>
+                    <td>99.8 </td>
+                    <td>96.6 </td>
+                    <td>90.2 </td>
+                    <td>89.9  </td>
+                </tr>
+                <tr>
+                    <td>X. Tian et al.</td>
+                    <td>ECCV (2022)</td>
+                    <td>99.8 </td>
+                    <td>67.1 </td>
+                    <td>100.0 </td>
+                    <td>97.8 </td>
+                    <td>97.3 </td>
+                    <td>93.7 </td>
+                    <td>100.0 </td>
+                    <td>99.4 </td>
+                    <td>97.4 </td>
+                    <td>97.6 </td>
+                    <td>99.3 </td>
+                    <td>96.9 </td>
+                    <td>84.7 </td>
+                    <td>97.7 </td>
+                    <td>93.4 </td>
+                    <td>96.7 </td>
+                    <td>95.4 </td>
+                    <td>100.0 </td>
+                    <td>95.2  </td>
+                </tr>
+                <tr>
+                    <td>X. Tian et al.</td>
+                    <td>ECCV (2022)</td>
+                    <td>99.9 </td>
+                    <td>65.8 </td>
+                    <td>99.4 </td>
+                    <td>95.4 </td>
+                    <td>96.7 </td>
+                    <td>92.4 </td>
+                    <td>100.0 </td>
+                    <td>97.0 </td>
+                    <td>97.3 </td>
+                    <td>96.2 </td>
+                    <td>82.9 </td>
+                    <td>96.9 </td>
+                    <td>91.0 </td>
+                    <td>95.9 </td>
+                    <td>94.9 </td>
+                    <td>99.8 </td>
+                    <td>98.7 </td>
+                    <td>94.8 </td>
+                    <td>94.2  </td>
+                </tr>
+                <tr>
+                    <td>F. Liu et al.</td>
+                    <td>TIE (2022)</td>
+                    <td>93.7 </td>
+                    <td>39.3 </td>
+                    <td>98.4 </td>
+                    <td>91.6 </td>
+                    <td>84.6 </td>
+                    <td>89.2 </td>
+                    <td>97.9 </td>
+                    <td>95.9 </td>
+                    <td>86.3 </td>
+                    <td>95.1 </td>
+                    <td>93.4 </td>
+                    <td>77.7 </td>
+                    <td>61.5 </td>
+                    <td>87.8 </td>
+                    <td>65.0 </td>
+                    <td>95.2 </td>
+                    <td>85.7 </td>
+                    <td>99.8 </td>
+                    <td>85.5  </td>
+                </tr>
+                <tr>
+                    <td>M. Stoiber et al.</td>
+                    <td>IJCV (2022)</td>
+                    <td>98.8 </td>
+                    <td>65.1 </td>
+                    <td>99.6 </td>
+                    <td>96.0 </td>
+                    <td>98.0 </td>
+                    <td>96.5 </td>
+                    <td>100.0 </td>
+                    <td>96.9 </td>
+                    <td>98.0 </td>
+                    <td>95.3 </td>
+                    <td>79.3 </td>
+                    <td>96.0 </td>
+                    <td>90.3 </td>
+                    <td>97.4 </td>
+                    <td>96.2 </td>
+                    <td>99.8 </td>
+                    <td>98.4 </td>
+                    <td>94.1 </td>
+                    <td>94.2  </td>
+                </tr>
+                <tr>
+                    <td>Q. Wang et al.</td>
+                    <td>TIE (2023)</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>94.6  </td>
+                </tr>
+                <tr>
+                    <td>X. Song et al.</td>
+                    <td>CGF (2023)</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>95.4  </td>
+                </tr>
+                <tr>
+                    <td>N. Lv et al.</td>
+                    <td>AEI (2024)</td>
+                    <td>97.7 </td>
+                    <td>54.2 </td>
+                    <td>99.6 </td>
+                    <td>96.9 </td>
+                    <td>99.1 </td>
+                    <td>98.7 </td>
+                    <td>100.0 </td>
+                    <td>98.9 </td>
+                    <td>96.9 </td>
+                    <td>96.9 </td>
+                    <td>83.0 </td>
+                    <td>97.1 </td>
+                    <td>95.3 </td>
+                    <td>97.6 </td>
+                    <td>97.6 </td>
+                    <td>99.8 </td>
+                    <td>99.5 </td>
+                    <td>95.6 </td>
+                    <td>94.7  </td>
+                </tr>
+            </tbody>    
+        </table>
+        
+        <h3>Dynamic Light scene</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">Method</th>
+                    <th>Ape</th>
+                    <th>Soda</th>
+                    <th>Vise</th>
+                    <th>Soup</th>
+                    <th>Camera</th>
+                    <th>Can</th>
+                    <th>Cat</th>
+                    <th>Clown</th>
+                    <th>Cube</th>
+                    <th>Driller</th>
+                    <th>Duck</th>
+                    <th>Egg</th>
+                    <th>Glue</th>
+                    <th>Iron</th>
+                    <th>Candy</th>
+                    <th>Lamp</th>
+                    <th>Phone</th>
+                    <th>Squirrel</th>
+                    <th>Avg</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>G. Wang et al.</td>
+                    <td>VC (2015)</td>
+                    <td>13.1 </td>
+                    <td>12.2 </td>
+                    <td>15.3 </td>
+                    <td>15.9 </td>
+                    <td>14.4 </td>
+                    <td>14.2 </td>
+                    <td>18.8 </td>
+                    <td>12.3 </td>
+                    <td>14.0 </td>
+                    <td>15.8 </td>
+                    <td>16.2 </td>
+                    <td>12.7 </td>
+                    <td>13.0 </td>
+                    <td>14.9 </td>
+                    <td>8.8 </td>
+                    <td>14.3 </td>
+                    <td>12.4 </td>
+                    <td>18.1 </td>
+                    <td>14.2  </td>
+                </tr>
+                <tr>
+                    <td>G. Wang et al.</td>
+                    <td>VC (2015)</td>
+                    <td>5.7 </td>
+                    <td>3.9 </td>
+                    <td>6.5 </td>
+                    <td>8.4 </td>
+                    <td>4.7 </td>
+                    <td>5.4 </td>
+                    <td>18.5 </td>
+                    <td>2.9 </td>
+                    <td>3.3 </td>
+                    <td>6.4 </td>
+                    <td>6.9 </td>
+                    <td>3.1 </td>
+                    <td>2.6 </td>
+                    <td>5.0 </td>
+                    <td>1.5 </td>
+                    <td>3.4 </td>
+                    <td>3.5 </td>
+                    <td>12.6 </td>
+                    <td>5.8  </td>
+                </tr>
+                <tr>
+                    <td>H. Tjaden et al.</td>
+                    <td>ICCV (2017)</td>
+                    <td>61.7 </td>
+                    <td>32.0 </td>
+                    <td>94.2 </td>
+                    <td>66.3 </td>
+                    <td>68.0 </td>
+                    <td>84.1 </td>
+                    <td>96.6 </td>
+                    <td>85.8 </td>
+                    <td>45.7 </td>
+                    <td>88.7 </td>
+                    <td>74.1 </td>
+                    <td>56.9 </td>
+                    <td>29.9 </td>
+                    <td>49.1 </td>
+                    <td>20.7 </td>
+                    <td>91.5 </td>
+                    <td>63.0 </td>
+                    <td>98.5 </td>
+                    <td>67.0  </td>
+                </tr>
+                <tr>
+                    <td>B. Wang et al.</td>
+                    <td>MTAP (2019)</td>
+                    <td>20.7 </td>
+                    <td>19.9 </td>
+                    <td>23.7 </td>
+                    <td>21.5 </td>
+                    <td>23.5 </td>
+                    <td>22.4 </td>
+                    <td>20.1 </td>
+                    <td>21.9 </td>
+                    <td>22.7 </td>
+                    <td>23.8 </td>
+                    <td>19.9 </td>
+                    <td>22.4 </td>
+                    <td>18.2 </td>
+                    <td>24.4 </td>
+                    <td>20.8 </td>
+                    <td>22.4 </td>
+                    <td>24.4 </td>
+                    <td>23.6 </td>
+                    <td>22.0  </td>
+                </tr>
+                <tr>
+                    <td>H. Tjaden et al.</td>
+                    <td>TPAMI (2019)</td>
+                    <td>84.9 </td>
+                    <td>42.0 </td>
+                    <td>99.0 </td>
+                    <td>81.3 </td>
+                    <td>84.3 </td>
+                    <td>88.9 </td>
+                    <td>95.6 </td>
+                    <td>94.6 </td>
+                    <td>86.4 </td>
+                    <td>77.3 </td>
+                    <td>52.9 </td>
+                    <td>77.9 </td>
+                    <td>47.9 </td>
+                    <td>96.9 </td>
+                    <td>81.7 </td>
+                    <td>99.3 </td>
+                    <td>92.5 </td>
+                    <td>77.5 </td>
+                    <td>81.2  </td>
+                </tr>
+                <tr>
+                    <td>L. Zhong et al.</td>
+                    <td>IJCV (2019)</td>
+                    <td>81.8 </td>
+                    <td>39.7 </td>
+                    <td>91.5 </td>
+                    <td>85.1 </td>
+                    <td>82.6 </td>
+                    <td>87.1 </td>
+                    <td>98.1 </td>
+                    <td>90.7 </td>
+                    <td>79.7 </td>
+                    <td>87.4 </td>
+                    <td>81.6 </td>
+                    <td>73.1 </td>
+                    <td>51.7 </td>
+                    <td>75.9 </td>
+                    <td>53.4 </td>
+                    <td>88.8 </td>
+                    <td>78.6 </td>
+                    <td>95.6 </td>
+                    <td>79.0  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>PG (2020)</td>
+                    <td>91.8 </td>
+                    <td>42.3 </td>
+                    <td>98.9 </td>
+                    <td>89.9 </td>
+                    <td>91.3 </td>
+                    <td>87.8 </td>
+                    <td>97.6 </td>
+                    <td>94.5 </td>
+                    <td>84.5 </td>
+                    <td>98.1 </td>
+                    <td>91.9 </td>
+                    <td>86.7 </td>
+                    <td>66.2 </td>
+                    <td>90.9 </td>
+                    <td>73.2 </td>
+                    <td>97.1 </td>
+                    <td>89.2 </td>
+                    <td>99.6 </td>
+                    <td>87.3  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>CGF (2020)</td>
+                    <td>91.8 </td>
+                    <td>42.3 </td>
+                    <td>98.9 </td>
+                    <td>89.9 </td>
+                    <td>91.3 </td>
+                    <td>87.8 </td>
+                    <td>97.6 </td>
+                    <td>94.5 </td>
+                    <td>84.5 </td>
+                    <td>98.1 </td>
+                    <td>91.9 </td>
+                    <td>86.7 </td>
+                    <td>66.2 </td>
+                    <td>90.9 </td>
+                    <td>73.2 </td>
+                    <td>97.1 </td>
+                    <td>89.2 </td>
+                    <td>99.6 </td>
+                    <td>87.3  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>CGF (2020)</td>
+                    <td>93.8 </td>
+                    <td>55.9 </td>
+                    <td>99.6 </td>
+                    <td>85.6 </td>
+                    <td>97.7 </td>
+                    <td>93.7 </td>
+                    <td>97.7 </td>
+                    <td>98.6 </td>
+                    <td>91.0 </td>
+                    <td>91.6 </td>
+                    <td>72.1 </td>
+                    <td>90.7 </td>
+                    <td>63.0 </td>
+                    <td>98.9 </td>
+                    <td>94.4 </td>
+                    <td>100.0 </td>
+                    <td>96.5 </td>
+                    <td>78.3 </td>
+                    <td>88.8  </td>
+                </tr>
+                <tr>
+                    <td>L. Zhong et al.</td>
+                    <td>TIP (2020)</td>
+                    <td>89.7 </td>
+                    <td>40.2 </td>
+                    <td>92.7 </td>
+                    <td>86.5 </td>
+                    <td>86.6 </td>
+                    <td>89.2 </td>
+                    <td>98.3 </td>
+                    <td>93.9 </td>
+                    <td>81.8 </td>
+                    <td>88.4 </td>
+                    <td>83.9 </td>
+                    <td>76.8 </td>
+                    <td>55.3 </td>
+                    <td>79.3 </td>
+                    <td>54.7 </td>
+                    <td>88.7 </td>
+                    <td>81.0 </td>
+                    <td>95.8 </td>
+                    <td>81.3  </td>
+                </tr>
+                <tr>
+                    <td>M. Stoiber et al.</td>
+                    <td>ACCV (2020)</td>
+                    <td>96.5 </td>
+                    <td>54.6 </td>
+                    <td>99.1 </td>
+                    <td>93.9 </td>
+                    <td>93.1 </td>
+                    <td>94.7 </td>
+                    <td>99.5 </td>
+                    <td>97.0 </td>
+                    <td>93.0 </td>
+                    <td>93.4 </td>
+                    <td>93.3 </td>
+                    <td>92.6 </td>
+                    <td>74.9 </td>
+                    <td>91.0 </td>
+                    <td>79.2 </td>
+                    <td>95.6 </td>
+                    <td>89.8 </td>
+                    <td>99.5 </td>
+                    <td>90.6  </td>
+                </tr>
+                <tr>
+                    <td>X. Sun et al.</td>
+                    <td>TCSVT (2021)</td>
+                    <td>71.2 </td>
+                    <td>26.6 </td>
+                    <td>81.1 </td>
+                    <td>33.3 </td>
+                    <td>84.0 </td>
+                    <td>57.3 </td>
+                    <td>76.5 </td>
+                    <td>65.3 </td>
+                    <td>21.5 </td>
+                    <td>78.3 </td>
+                    <td>52.0 </td>
+                    <td>62.1 </td>
+                    <td>46.8 </td>
+                    <td>62.5 </td>
+                    <td>29.5 </td>
+                    <td>67.6 </td>
+                    <td>82.5 </td>
+                    <td>90.6 </td>
+                    <td>60.5  </td>
+                </tr>
+                <tr>
+                    <td>X. Sun et al.</td>
+                    <td>TCSVT (2021)</td>
+                    <td>93.8 </td>
+                    <td>55.9 </td>
+                    <td>99.6 </td>
+                    <td>85.6 </td>
+                    <td>97.7 </td>
+                    <td>93.7 </td>
+                    <td>97.7 </td>
+                    <td>96.5 </td>
+                    <td>78.3 </td>
+                    <td>98.6 </td>
+                    <td>91.0 </td>
+                    <td>91.6 </td>
+                    <td>72.1 </td>
+                    <td>90.7 </td>
+                    <td>63.0 </td>
+                    <td>98.9 </td>
+                    <td>94.4 </td>
+                    <td>100.0 </td>
+                    <td>88.8  </td>
+                </tr>
+                <tr>
+                    <td>X. Sun et al.</td>
+                    <td>TCSVT (2021)</td>
+                    <td>91.8 </td>
+                    <td>42.3 </td>
+                    <td>98.9 </td>
+                    <td>89.9 </td>
+                    <td>91.3 </td>
+                    <td>87.8 </td>
+                    <td>97.6 </td>
+                    <td>98.1 </td>
+                    <td>91.9 </td>
+                    <td>86.7 </td>
+                    <td>66.2 </td>
+                    <td>90.9 </td>
+                    <td>73.2 </td>
+                    <td>97.1 </td>
+                    <td>89.2 </td>
+                    <td>99.6 </td>
+                    <td>94.5 </td>
+                    <td>84.5 </td>
+                    <td>87.3  </td>
+                </tr>
+                <tr>
+                    <td>J. Li et al.</td>
+                    <td>C&amp;G (2021)</td>
+                    <td>89.1 </td>
+                    <td>44.5 </td>
+                    <td>92.1 </td>
+                    <td>86.7 </td>
+                    <td>87.7 </td>
+                    <td>81.6 </td>
+                    <td>95.7 </td>
+                    <td>92.5 </td>
+                    <td>81.0 </td>
+                    <td>75.5 </td>
+                    <td>87.7 </td>
+                    <td>82.8 </td>
+                    <td>61.1 </td>
+                    <td>62.4 </td>
+                    <td>61.9 </td>
+                    <td>76.0 </td>
+                    <td>73.8 </td>
+                    <td>94.4 </td>
+                    <td>79.3  </td>
+                </tr>
+                <tr>
+                    <td>J. Li et al.</td>
+                    <td>JCST (2021)</td>
+                    <td>93.5 </td>
+                    <td>43.1 </td>
+                    <td>96.6 </td>
+                    <td>88.5 </td>
+                    <td>92.8 </td>
+                    <td>86.0 </td>
+                    <td>99.6 </td>
+                    <td>95.5 </td>
+                    <td>85.7 </td>
+                    <td>96.8 </td>
+                    <td>91.1 </td>
+                    <td>90.2 </td>
+                    <td>68.4 </td>
+                    <td>86.8 </td>
+                    <td>59.7 </td>
+                    <td>96.1 </td>
+                    <td>91.5 </td>
+                    <td>99.2 </td>
+                    <td>86.7  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>TVCG (2022)</td>
+                    <td>94.3 </td>
+                    <td>48.3 </td>
+                    <td>99.5 </td>
+                    <td>90.1 </td>
+                    <td>94.6 </td>
+                    <td>96.1 </td>
+                    <td>97.9 </td>
+                    <td>99.1 </td>
+                    <td>92.9 </td>
+                    <td>91.5 </td>
+                    <td>72.6 </td>
+                    <td>94.7 </td>
+                    <td>80.0 </td>
+                    <td>98.3 </td>
+                    <td>95.2 </td>
+                    <td>99.8 </td>
+                    <td>97.3 </td>
+                    <td>90.9 </td>
+                    <td>90.7  </td>
+                </tr>
+                <tr>
+                    <td>X. Tian et al.</td>
+                    <td>ECCV (2022)</td>
+                    <td>100.0 </td>
+                    <td>64.5 </td>
+                    <td>99.8 </td>
+                    <td>97.9 </td>
+                    <td>97.9 </td>
+                    <td>94.0 </td>
+                    <td>100.0 </td>
+                    <td>99.5 </td>
+                    <td>97.0 </td>
+                    <td>98.8 </td>
+                    <td>99.3 </td>
+                    <td>97.6 </td>
+                    <td>87.5 </td>
+                    <td>97.4 </td>
+                    <td>92.4 </td>
+                    <td>97.1 </td>
+                    <td>96.4 </td>
+                    <td>100.0 </td>
+                    <td>95.4  </td>
+                </tr>
+                <tr>
+                    <td>X. Tian et al.</td>
+                    <td>ECCV (2022)</td>
+                    <td>99.6 </td>
+                    <td>63.9 </td>
+                    <td>99.7 </td>
+                    <td>95.3 </td>
+                    <td>97.1 </td>
+                    <td>93.0 </td>
+                    <td>100.0 </td>
+                    <td>98.5 </td>
+                    <td>96.9 </td>
+                    <td>97.1 </td>
+                    <td>86.6 </td>
+                    <td>95.1 </td>
+                    <td>91.2 </td>
+                    <td>96.2 </td>
+                    <td>95.6 </td>
+                    <td>99.9 </td>
+                    <td>98.7 </td>
+                    <td>93.8 </td>
+                    <td>94.3  </td>
+                </tr>
+                <tr>
+                    <td>F. Liu et al.</td>
+                    <td>TIE (2022)</td>
+                    <td>93.5 </td>
+                    <td>38.2 </td>
+                    <td>98.4 </td>
+                    <td>88.8 </td>
+                    <td>87.0 </td>
+                    <td>88.5 </td>
+                    <td>98.1 </td>
+                    <td>94.4 </td>
+                    <td>85.1 </td>
+                    <td>95.1 </td>
+                    <td>92.7 </td>
+                    <td>76.1 </td>
+                    <td>58.1 </td>
+                    <td>79.6 </td>
+                    <td>62.1 </td>
+                    <td>93.2 </td>
+                    <td>84.7 </td>
+                    <td>99.6 </td>
+                    <td>84.1  </td>
+                </tr>
+                <tr>
+                    <td>M. Stoiber et al.</td>
+                    <td>IJCV (2022)</td>
+                    <td>98.2 </td>
+                    <td>65.2 </td>
+                    <td>99.2 </td>
+                    <td>95.6 </td>
+                    <td>97.5 </td>
+                    <td>98.1 </td>
+                    <td>100.0 </td>
+                    <td>97.5 </td>
+                    <td>97.9 </td>
+                    <td>96.9 </td>
+                    <td>86.1 </td>
+                    <td>95.2 </td>
+                    <td>89.3 </td>
+                    <td>97.0 </td>
+                    <td>95.9 </td>
+                    <td>99.9 </td>
+                    <td>98.5 </td>
+                    <td>94.2 </td>
+                    <td>94.6  </td>
+                </tr>
+                <tr>
+                    <td>Q. Wang et al.</td>
+                    <td>TIE (2023)</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>95.2  </td>
+                </tr>
+                <tr>
+                    <td>X. Song et al.</td>
+                    <td>CGF(2023)</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>94.9  </td>
+                </tr>
+                <tr>
+                    <td>N. Lv et al.</td>
+                    <td>AEI (2024)</td>
+                    <td>98.5 </td>
+                    <td>49.7 </td>
+                    <td>99.8 </td>
+                    <td>97.1 </td>
+                    <td>98.6 </td>
+                    <td>98.8 </td>
+                    <td>100.0 </td>
+                    <td>98.9 </td>
+                    <td>97.9 </td>
+                    <td>98.4 </td>
+                    <td>87.8 </td>
+                    <td>97.9 </td>
+                    <td>94.4 </td>
+                    <td>97.9 </td>
+                    <td>97.8 </td>
+                    <td>100.0 </td>
+                    <td>99.2 </td>
+                    <td>97.1 </td>
+                    <td>95.0  </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h3>Noisy (+ Dyanmic Light) scene</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">Method</th>
+                    <th>Ape</th>
+                    <th>Soda</th>
+                    <th>Vise</th>
+                    <th>Soup</th>
+                    <th>Camera</th>
+                    <th>Can</th>
+                    <th>Cat</th>
+                    <th>Clown</th>
+                    <th>Cube</th>
+                    <th>Driller</th>
+                    <th>Duck</th>
+                    <th>Egg</th>
+                    <th>Glue</th>
+                    <th>Iron</th>
+                    <th>Candy</th>
+                    <th>Lamp</th>
+                    <th>Phone</th>
+                    <th>Squirrel</th>
+                    <th>Avg</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>G. Wang et al.</td>
+                    <td>VC (2015)</td>
+                    <td>10.4 </td>
+                    <td>10.3 </td>
+                    <td>12.3 </td>
+                    <td>14.5 </td>
+                    <td>6.5 </td>
+                    <td>8.4 </td>
+                    <td>16.6 </td>
+                    <td>11.4 </td>
+                    <td>6.9 </td>
+                    <td>9.3 </td>
+                    <td>17.5 </td>
+                    <td>3.7 </td>
+                    <td>5.6 </td>
+                    <td>11.4 </td>
+                    <td>5.8 </td>
+                    <td>9.6 </td>
+                    <td>7.3 </td>
+                    <td>12.9 </td>
+                    <td>10.0  </td>
+                </tr>
+                <tr>
+                    <td>G. Wang et al.</td>
+                    <td>VC (2015)</td>
+                    <td>2.5 </td>
+                    <td>2.6 </td>
+                    <td>1.1 </td>
+                    <td>5.1 </td>
+                    <td>0.7 </td>
+                    <td>0.2 </td>
+                    <td>5.6 </td>
+                    <td>1.4 </td>
+                    <td>0.7 </td>
+                    <td>0.2 </td>
+                    <td>7.2 </td>
+                    <td>0.1 </td>
+                    <td>0.6 </td>
+                    <td>1.1 </td>
+                    <td>1.0 </td>
+                    <td>0.8 </td>
+                    <td>0.2 </td>
+                    <td>2.0 </td>
+                    <td>1.9  </td>
+                </tr>
+                <tr>
+                    <td>H. Tjaden et al.</td>
+                    <td>ICCV (2017)</td>
+                    <td>55.9 </td>
+                    <td>35.3 </td>
+                    <td>75.4 </td>
+                    <td>67.4 </td>
+                    <td>27.8 </td>
+                    <td>10.2 </td>
+                    <td>94.3 </td>
+                    <td>33.4 </td>
+                    <td>8.6 </td>
+                    <td>50.9 </td>
+                    <td>76.3 </td>
+                    <td>2.3 </td>
+                    <td>2.2 </td>
+                    <td>18.2 </td>
+                    <td>11.4 </td>
+                    <td>36.6 </td>
+                    <td>31.3 </td>
+                    <td>93.5 </td>
+                    <td>40.6  </td>
+                </tr>
+                <tr>
+                    <td>B. Wang et al.</td>
+                    <td>MTAP (2019)</td>
+                    <td>19.8 </td>
+                    <td>21.4 </td>
+                    <td>21.2 </td>
+                    <td>21.0 </td>
+                    <td>22.0 </td>
+                    <td>20.3 </td>
+                    <td>19.8 </td>
+                    <td>21.2 </td>
+                    <td>22.4 </td>
+                    <td>20.4 </td>
+                    <td>20.4 </td>
+                    <td>20.7 </td>
+                    <td>19.1 </td>
+                    <td>20.4 </td>
+                    <td>20.9 </td>
+                    <td>20.6 </td>
+                    <td>21.0 </td>
+                    <td>20.8 </td>
+                    <td>20.7  </td>
+                </tr>
+                <tr>
+                    <td>H. Tjaden et al.</td>
+                    <td>TPAMI (2019)</td>
+                    <td>77.5 </td>
+                    <td>44.5 </td>
+                    <td>91.5 </td>
+                    <td>82.9 </td>
+                    <td>51.7 </td>
+                    <td>38.4 </td>
+                    <td>95.1 </td>
+                    <td>64.3 </td>
+                    <td>88.5 </td>
+                    <td>11.2 </td>
+                    <td>2.9 </td>
+                    <td>46.7 </td>
+                    <td>32.7 </td>
+                    <td>57.3 </td>
+                    <td>44.1 </td>
+                    <td>96.6 </td>
+                    <td>69.2 </td>
+                    <td>24.4 </td>
+                    <td>56.6  </td>
+                </tr>
+                <tr>
+                    <td>L. Zhong et al.</td>
+                    <td>IJCV (2019)</td>
+                    <td>80.5 </td>
+                    <td>35.0 </td>
+                    <td>80.9 </td>
+                    <td>85.5 </td>
+                    <td>58.4 </td>
+                    <td>53.5 </td>
+                    <td>96.7 </td>
+                    <td>65.9 </td>
+                    <td>38.2 </td>
+                    <td>71.8 </td>
+                    <td>85.8 </td>
+                    <td>29.7 </td>
+                    <td>17.0 </td>
+                    <td>59.3 </td>
+                    <td>34.8 </td>
+                    <td>61.1 </td>
+                    <td>60.8 </td>
+                    <td>93.6 </td>
+                    <td>61.6  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>PG (2020)</td>
+                    <td>89.0 </td>
+                    <td>45.0 </td>
+                    <td>89.5 </td>
+                    <td>90.2 </td>
+                    <td>68.9 </td>
+                    <td>38.3 </td>
+                    <td>95.9 </td>
+                    <td>72.8 </td>
+                    <td>20.1 </td>
+                    <td>85.5 </td>
+                    <td>92.2 </td>
+                    <td>26.8 </td>
+                    <td>15.8 </td>
+                    <td>66.2 </td>
+                    <td>52.2 </td>
+                    <td>58.3 </td>
+                    <td>65.1 </td>
+                    <td>98.4 </td>
+                    <td>65.0  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>CGF (2020)</td>
+                    <td>89.0 </td>
+                    <td>45.0 </td>
+                    <td>89.5 </td>
+                    <td>90.2 </td>
+                    <td>68.9 </td>
+                    <td>38.3 </td>
+                    <td>95.9 </td>
+                    <td>72.8 </td>
+                    <td>20.1 </td>
+                    <td>85.5 </td>
+                    <td>92.2 </td>
+                    <td>26.8 </td>
+                    <td>15.8 </td>
+                    <td>66.2 </td>
+                    <td>52.2 </td>
+                    <td>58.3 </td>
+                    <td>65.1 </td>
+                    <td>98.4 </td>
+                    <td>65.0  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>CGF (2020)</td>
+                    <td>92.5 </td>
+                    <td>56.2 </td>
+                    <td>98.0 </td>
+                    <td>85.1 </td>
+                    <td>91.7 </td>
+                    <td>79.0 </td>
+                    <td>97.7 </td>
+                    <td>96.6 </td>
+                    <td>90.8 </td>
+                    <td>70.2 </td>
+                    <td>50.9 </td>
+                    <td>84.3 </td>
+                    <td>49.9 </td>
+                    <td>91.2 </td>
+                    <td>89.4 </td>
+                    <td>99.4 </td>
+                    <td>86.2 </td>
+                    <td>40.1 </td>
+                    <td>80.5  </td>
+                </tr>
+                <tr>
+                    <td>L. Zhong et al.</td>
+                    <td>TIP (2020)</td>
+                    <td>79.3 </td>
+                    <td>35.2 </td>
+                    <td>82.6 </td>
+                    <td>86.2 </td>
+                    <td>65.1 </td>
+                    <td>56.9 </td>
+                    <td>96.9 </td>
+                    <td>67.0 </td>
+                    <td>37.5 </td>
+                    <td>75.2 </td>
+                    <td>85.4 </td>
+                    <td>35.2 </td>
+                    <td>18.9 </td>
+                    <td>63.7 </td>
+                    <td>35.4 </td>
+                    <td>64.6 </td>
+                    <td>66.3 </td>
+                    <td>93.2 </td>
+                    <td>63.6  </td>
+                </tr>
+                <tr>
+                    <td>M. Stoiber et al.</td>
+                    <td>ACCV (2020)</td>
+                    <td>91.9 </td>
+                    <td>53.3 </td>
+                    <td>90.2 </td>
+                    <td>92.6 </td>
+                    <td>67.9 </td>
+                    <td>59.3 </td>
+                    <td>98.4 </td>
+                    <td>80.6 </td>
+                    <td>43.5 </td>
+                    <td>78.1 </td>
+                    <td>92.5 </td>
+                    <td>44.0 </td>
+                    <td>31.3 </td>
+                    <td>72.3 </td>
+                    <td>62.0 </td>
+                    <td>59.9 </td>
+                    <td>71.7 </td>
+                    <td>98.3 </td>
+                    <td>71.5  </td>
+                </tr>
+                <tr>
+                    <td>X. Sun et al.</td>
+                    <td>TCSVT (2021)</td>
+                    <td>72.0 </td>
+                    <td>25.1 </td>
+                    <td>79.1 </td>
+                    <td>28.6 </td>
+                    <td>82.9 </td>
+                    <td>56.2 </td>
+                    <td>75.6 </td>
+                    <td>61.6 </td>
+                    <td>20.4 </td>
+                    <td>84.2 </td>
+                    <td>47.9 </td>
+                    <td>60.6 </td>
+                    <td>44.7 </td>
+                    <td>60.5 </td>
+                    <td>28.4 </td>
+                    <td>69.1 </td>
+                    <td>82.4 </td>
+                    <td>87.5 </td>
+                    <td>59.3  </td>
+                </tr>
+                <tr>
+                    <td>X. Sun et al.</td>
+                    <td>TCSVT (2021)</td>
+                    <td>92.5 </td>
+                    <td>56.2 </td>
+                    <td>98.0 </td>
+                    <td>85.1 </td>
+                    <td>91.7 </td>
+                    <td>79.0 </td>
+                    <td>97.7 </td>
+                    <td>86.2 </td>
+                    <td>40.1 </td>
+                    <td>96.6 </td>
+                    <td>90.8 </td>
+                    <td>70.2 </td>
+                    <td>50.9 </td>
+                    <td>84.3 </td>
+                    <td>49.9 </td>
+                    <td>91.2 </td>
+                    <td>89.4 </td>
+                    <td>99.4 </td>
+                    <td>80.5  </td>
+                </tr>
+                <tr>
+                    <td>X. Sun et al.</td>
+                    <td>TCSVT (2021)</td>
+                    <td>89.0 </td>
+                    <td>45.0 </td>
+                    <td>89.5 </td>
+                    <td>90.2 </td>
+                    <td>68.9 </td>
+                    <td>38.3 </td>
+                    <td>95.9 </td>
+                    <td>85.5 </td>
+                    <td>92.2 </td>
+                    <td>26.8 </td>
+                    <td>15.8 </td>
+                    <td>66.2 </td>
+                    <td>52.2 </td>
+                    <td>58.3 </td>
+                    <td>65.1 </td>
+                    <td>98.4 </td>
+                    <td>72.8 </td>
+                    <td>20.1 </td>
+                    <td>65.0  </td>
+                </tr>
+                <tr>
+                    <td>J. Li et al.</td>
+                    <td>C&amp;G (2021)</td>
+                    <td>83.8 </td>
+                    <td>45.9 </td>
+                    <td>79.2 </td>
+                    <td>82.5 </td>
+                    <td>61.1 </td>
+                    <td>43.2 </td>
+                    <td>92.5 </td>
+                    <td>68.2 </td>
+                    <td>26.4 </td>
+                    <td>58.7 </td>
+                    <td>86.1 </td>
+                    <td>33.1 </td>
+                    <td>19.4 </td>
+                    <td>44.5 </td>
+                    <td>44.4 </td>
+                    <td>53.2 </td>
+                    <td>51.6 </td>
+                    <td>91.0 </td>
+                    <td>59.2  </td>
+                </tr>
+                <tr>
+                    <td>J. Li et al.</td>
+                    <td>JCST (2021)</td>
+                    <td>89.1 </td>
+                    <td>44.0 </td>
+                    <td>91.6 </td>
+                    <td>89.4 </td>
+                    <td>75.2 </td>
+                    <td>62.3 </td>
+                    <td>98.6 </td>
+                    <td>77.3 </td>
+                    <td>41.2 </td>
+                    <td>81.5 </td>
+                    <td>91.6 </td>
+                    <td>54.5 </td>
+                    <td>31.8 </td>
+                    <td>65.0 </td>
+                    <td>46.0 </td>
+                    <td>78.5 </td>
+                    <td>69.6 </td>
+                    <td>97.6 </td>
+                    <td>71.4  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>TVCG (2022)</td>
+                    <td>91.0 </td>
+                    <td>49.1 </td>
+                    <td>95.6 </td>
+                    <td>91.0 </td>
+                    <td>76.3 </td>
+                    <td>54.1 </td>
+                    <td>97.1 </td>
+                    <td>92.8 </td>
+                    <td>95.3 </td>
+                    <td>30.2 </td>
+                    <td>7.8 </td>
+                    <td>73.9 </td>
+                    <td>56.8 </td>
+                    <td>71.4 </td>
+                    <td>70.8 </td>
+                    <td>98.7 </td>
+                    <td>73.7 </td>
+                    <td>27.3 </td>
+                    <td>69.6  </td>
+                </tr>
+                <tr>
+                    <td>X. Tian et al.</td>
+                    <td>ECCV (2022)</td>
+                    <td>99.3 </td>
+                    <td>62.0 </td>
+                    <td>95.8 </td>
+                    <td>97.7 </td>
+                    <td>90.4 </td>
+                    <td>68.6 </td>
+                    <td>99.9 </td>
+                    <td>91.3 </td>
+                    <td>54.2 </td>
+                    <td>95.4 </td>
+                    <td>99.0 </td>
+                    <td>64.8 </td>
+                    <td>51.6 </td>
+                    <td>89.2 </td>
+                    <td>75.2 </td>
+                    <td>74.7 </td>
+                    <td>87.6 </td>
+                    <td>100.0 </td>
+                    <td>83.2  </td>
+                </tr>
+                <tr>
+                    <td>X. Tian et al.</td>
+                    <td>ECCV (2022)</td>
+                    <td>98.5 </td>
+                    <td>61.4 </td>
+                    <td>95.1 </td>
+                    <td>94.2 </td>
+                    <td>90.7 </td>
+                    <td>69.5 </td>
+                    <td>99.9 </td>
+                    <td>95.6 </td>
+                    <td>97.3 </td>
+                    <td>68.3 </td>
+                    <td>52.5 </td>
+                    <td>88.1 </td>
+                    <td>76.5 </td>
+                    <td>76.6 </td>
+                    <td>88.9 </td>
+                    <td>99.2 </td>
+                    <td>89.1 </td>
+                    <td>56.3 </td>
+                    <td>83.2  </td>
+                </tr>
+                <tr>
+                    <td>F. Liu et al.</td>
+                    <td>TIE (2022)</td>
+                    <td>84.7 </td>
+                    <td>33.0 </td>
+                    <td>88.8 </td>
+                    <td>89.5 </td>
+                    <td>56.4 </td>
+                    <td>50.1 </td>
+                    <td>94.1 </td>
+                    <td>66.5 </td>
+                    <td>32.3 </td>
+                    <td>79.6 </td>
+                    <td>94.2 </td>
+                    <td>29.6 </td>
+                    <td>19.9 </td>
+                    <td>63.4 </td>
+                    <td>40.3 </td>
+                    <td>61.6 </td>
+                    <td>62.4 </td>
+                    <td>96.9 </td>
+                    <td>63.5  </td>
+                </tr>
+                <tr>
+                    <td>M. Stoiber et al.</td>
+                    <td>IJCV (2022)</td>
+                    <td>96.9 </td>
+                    <td>61.9 </td>
+                    <td>95.4 </td>
+                    <td>95.7 </td>
+                    <td>84.5 </td>
+                    <td>73.9 </td>
+                    <td>99.9 </td>
+                    <td>87.8 </td>
+                    <td>97.6 </td>
+                    <td>62.2 </td>
+                    <td>43.4 </td>
+                    <td>84.3 </td>
+                    <td>78.2 </td>
+                    <td>73.3 </td>
+                    <td>83.1 </td>
+                    <td>99.7 </td>
+                    <td>90.3 </td>
+                    <td>62.2 </td>
+                    <td>81.7  </td>
+                </tr>
+                <tr>
+                    <td>Q. Wang et al.</td>
+                    <td>TIE (2023)</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>83.1  </td>
+                </tr>
+                <tr>
+                    <td>X. Song et al.</td>
+                    <td>CGF(2023)</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>86.2  </td>
+                </tr>
+                <tr>
+                    <td>N. Lv et al.</td>
+                    <td>AEI (2024)</td>
+                    <td>98.0 </td>
+                    <td>50.3 </td>
+                    <td>95.1 </td>
+                    <td>98.5 </td>
+                    <td>93.8 </td>
+                    <td>83.2 </td>
+                    <td>99.9 </td>
+                    <td>94.7 </td>
+                    <td>97.2 </td>
+                    <td>79.5 </td>
+                    <td>59.2 </td>
+                    <td>89.6 </td>
+                    <td>86.3 </td>
+                    <td>77.7 </td>
+                    <td>90.0 </td>
+                    <td>99.9 </td>
+                    <td>89.9 </td>
+                    <td>65.2 </td>
+                    <td>86.0  </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h3>Occlusion (+ Dynamic Light) scene</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">Method</th>
+                    <th>Ape</th>
+                    <th>Soda</th>
+                    <th>Vise</th>
+                    <th>Soup</th>
+                    <th>Camera</th>
+                    <th>Can</th>
+                    <th>Cat</th>
+                    <th>Clown</th>
+                    <th>Cube</th>
+                    <th>Driller</th>
+                    <th>Duck</th>
+                    <th>Egg</th>
+                    <th>Glue</th>
+                    <th>Iron</th>
+                    <th>Candy</th>
+                    <th>Lamp</th>
+                    <th>Phone</th>
+                    <th>Squirrel</th>
+                    <th>Avg</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>G. Wang et al.</td>
+                    <td>VC (2015)</td>
+                    <td>12.1 </td>
+                    <td>12.0 </td>
+                    <td>14.6 </td>
+                    <td>13.9 </td>
+                    <td>13.5 </td>
+                    <td>14.7 </td>
+                    <td>18.4 </td>
+                    <td>13.1 </td>
+                    <td>13.2 </td>
+                    <td>16.8 </td>
+                    <td>17.0 </td>
+                    <td>11.6 </td>
+                    <td>11.6 </td>
+                    <td>15.1 </td>
+                    <td>8.0 </td>
+                    <td>14.3 </td>
+                    <td>14.3 </td>
+                    <td>16.7 </td>
+                    <td>13.9  </td>
+                </tr>
+                <tr>
+                    <td>G. Wang et al.</td>
+                    <td>VC (2015)</td>
+                    <td>5.8 </td>
+                    <td>3.2 </td>
+                    <td>6.7 </td>
+                    <td>8.2 </td>
+                    <td>6.3 </td>
+                    <td>5.1 </td>
+                    <td>13.9 </td>
+                    <td>3.6 </td>
+                    <td>3.6 </td>
+                    <td>5.6 </td>
+                    <td>8.0 </td>
+                    <td>2.6 </td>
+                    <td>2.8 </td>
+                    <td>4.6 </td>
+                    <td>1.5 </td>
+                    <td>3.6 </td>
+                    <td>4.5 </td>
+                    <td>9.8 </td>
+                    <td>5.5  </td>
+                </tr>
+                <tr>
+                    <td>H. Tjaden et al.</td>
+                    <td>ICCV (2017)</td>
+                    <td>55.2 </td>
+                    <td>29.9 </td>
+                    <td>82.4 </td>
+                    <td>56.9 </td>
+                    <td>55.7 </td>
+                    <td>72.2 </td>
+                    <td>87.9 </td>
+                    <td>75.7 </td>
+                    <td>39.6 </td>
+                    <td>78.7 </td>
+                    <td>68.1 </td>
+                    <td>47.1 </td>
+                    <td>26.2 </td>
+                    <td>35.6 </td>
+                    <td>16.6 </td>
+                    <td>78.6 </td>
+                    <td>50.3 </td>
+                    <td>77.6 </td>
+                    <td>57.5  </td>
+                </tr>
+                <tr>
+                    <td>B. Wang et al.</td>
+                    <td>MTAP (2019)</td>
+                    <td>19.8 </td>
+                    <td>21.4 </td>
+                    <td>21.2 </td>
+                    <td>21.0 </td>
+                    <td>22.0 </td>
+                    <td>20.3 </td>
+                    <td>19.8 </td>
+                    <td>21.2 </td>
+                    <td>22.4 </td>
+                    <td>20.4 </td>
+                    <td>20.4 </td>
+                    <td>20.7 </td>
+                    <td>19.1 </td>
+                    <td>20.4 </td>
+                    <td>20.9 </td>
+                    <td>20.6 </td>
+                    <td>21.0 </td>
+                    <td>20.8 </td>
+                    <td>20.7  </td>
+                </tr>
+                <tr>
+                    <td>H. Tjaden et al.</td>
+                    <td>TPAMI (2019)</td>
+                    <td>80.0 </td>
+                    <td>42.7 </td>
+                    <td>91.8 </td>
+                    <td>73.5 </td>
+                    <td>76.1 </td>
+                    <td>81.7 </td>
+                    <td>89.8 </td>
+                    <td>86.7 </td>
+                    <td>80.5 </td>
+                    <td>67.0 </td>
+                    <td>46.6 </td>
+                    <td>64.0 </td>
+                    <td>43.6 </td>
+                    <td>88.8 </td>
+                    <td>68.6 </td>
+                    <td>86.2 </td>
+                    <td>82.6 </td>
+                    <td>68.7 </td>
+                    <td>73.3  </td>
+                </tr>
+                <tr>
+                    <td>L. Zhong et al.</td>
+                    <td>IJCV (2019)</td>
+                    <td>77.7 </td>
+                    <td>37.3 </td>
+                    <td>87.1 </td>
+                    <td>78.7 </td>
+                    <td>74.6 </td>
+                    <td>81.0 </td>
+                    <td>93.8 </td>
+                    <td>84.3 </td>
+                    <td>73.2 </td>
+                    <td>83.7 </td>
+                    <td>77.0 </td>
+                    <td>66.4 </td>
+                    <td>48.6 </td>
+                    <td>70.8 </td>
+                    <td>49.6 </td>
+                    <td>85.0 </td>
+                    <td>73.8 </td>
+                    <td>90.6 </td>
+                    <td>74.1  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>PG (2020)</td>
+                    <td>86.2 </td>
+                    <td>46.3 </td>
+                    <td>97.8 </td>
+                    <td>87.5 </td>
+                    <td>86.5 </td>
+                    <td>86.3 </td>
+                    <td>95.7 </td>
+                    <td>90.7 </td>
+                    <td>78.8 </td>
+                    <td>96.5 </td>
+                    <td>86.0 </td>
+                    <td>80.6 </td>
+                    <td>59.9 </td>
+                    <td>86.8 </td>
+                    <td>69.6 </td>
+                    <td>93.3 </td>
+                    <td>81.8 </td>
+                    <td>95.8 </td>
+                    <td>83.6  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>CGF (2020)</td>
+                    <td>86.2 </td>
+                    <td>46.3 </td>
+                    <td>97.8 </td>
+                    <td>87.5 </td>
+                    <td>86.5 </td>
+                    <td>86.3 </td>
+                    <td>95.7 </td>
+                    <td>90.7 </td>
+                    <td>78.8 </td>
+                    <td>96.5 </td>
+                    <td>86.0 </td>
+                    <td>80.6 </td>
+                    <td>59.9 </td>
+                    <td>86.8 </td>
+                    <td>69.6 </td>
+                    <td>93.3 </td>
+                    <td>81.8 </td>
+                    <td>95.8 </td>
+                    <td>83.6  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>CGF (2020)</td>
+                    <td>91.3 </td>
+                    <td>56.7 </td>
+                    <td>97.8 </td>
+                    <td>82.0 </td>
+                    <td>92.8 </td>
+                    <td>89.9 </td>
+                    <td>96.6 </td>
+                    <td>97.0 </td>
+                    <td>85.0 </td>
+                    <td>84.6 </td>
+                    <td>66.9 </td>
+                    <td>87.7 </td>
+                    <td>56.1 </td>
+                    <td>95.1 </td>
+                    <td>89.8 </td>
+                    <td>98.2 </td>
+                    <td>92.2 </td>
+                    <td>71.8 </td>
+                    <td>85.1  </td>
+                </tr>
+                <tr>
+                    <td>L. Zhong et al.</td>
+                    <td>TIP (2020)</td>
+                    <td>83.9 </td>
+                    <td>38.1 </td>
+                    <td>92.4 </td>
+                    <td>81.5 </td>
+                    <td>81.3 </td>
+                    <td>85.5 </td>
+                    <td>97.5 </td>
+                    <td>88.9 </td>
+                    <td>76.1 </td>
+                    <td>87.5 </td>
+                    <td>81.7 </td>
+                    <td>72.7 </td>
+                    <td>52.5 </td>
+                    <td>77.2 </td>
+                    <td>53.9 </td>
+                    <td>88.5 </td>
+                    <td>79.3 </td>
+                    <td>92.5 </td>
+                    <td>78.4  </td>
+                </tr>
+                <tr>
+                    <td>M. Stoiber et al.</td>
+                    <td>ACCV (2020)</td>
+                    <td>90.8 </td>
+                    <td>51.7 </td>
+                    <td>95.9 </td>
+                    <td>88.5 </td>
+                    <td>88.0 </td>
+                    <td>90.5 </td>
+                    <td>96.9 </td>
+                    <td>91.6 </td>
+                    <td>87.1 </td>
+                    <td>90.3 </td>
+                    <td>86.4 </td>
+                    <td>85.6 </td>
+                    <td>65.8 </td>
+                    <td>87.0 </td>
+                    <td>72.7 </td>
+                    <td>91.2 </td>
+                    <td>84.0 </td>
+                    <td>97.0 </td>
+                    <td>85.6  </td>
+                </tr>
+                <tr>
+                    <td>X. Sun et al.</td>
+                    <td>TCSVT (2021)</td>
+                    <td>71.2 </td>
+                    <td>25.3 </td>
+                    <td>81.5 </td>
+                    <td>32.8 </td>
+                    <td>81.1 </td>
+                    <td>57.9 </td>
+                    <td>76.6 </td>
+                    <td>65.4 </td>
+                    <td>22.3 </td>
+                    <td>81.3 </td>
+                    <td>45.2 </td>
+                    <td>61.7 </td>
+                    <td>46.2 </td>
+                    <td>60.2 </td>
+                    <td>31.0 </td>
+                    <td>69.4 </td>
+                    <td>80.0 </td>
+                    <td>86.8 </td>
+                    <td>59.8  </td>
+                </tr>
+                <tr>
+                    <td>X. Sun et al.</td>
+                    <td>TCSVT (2021)</td>
+                    <td>91.3 </td>
+                    <td>56.7 </td>
+                    <td>97.8 </td>
+                    <td>82.0 </td>
+                    <td>92.8 </td>
+                    <td>89.9 </td>
+                    <td>96.6 </td>
+                    <td>92.2 </td>
+                    <td>71.8 </td>
+                    <td>97.0 </td>
+                    <td>85.0 </td>
+                    <td>84.6 </td>
+                    <td>66.9 </td>
+                    <td>87.7 </td>
+                    <td>56.1 </td>
+                    <td>95.1 </td>
+                    <td>89.8 </td>
+                    <td>98.2 </td>
+                    <td>85.1  </td>
+                </tr>
+                <tr>
+                    <td>X. Sun et al.</td>
+                    <td>TCSVT (2021)</td>
+                    <td>86.2 </td>
+                    <td>46.3 </td>
+                    <td>97.8 </td>
+                    <td>87.5 </td>
+                    <td>86.5 </td>
+                    <td>86.3 </td>
+                    <td>95.7 </td>
+                    <td>96.5 </td>
+                    <td>86.0 </td>
+                    <td>80.6 </td>
+                    <td>59.9 </td>
+                    <td>86.8 </td>
+                    <td>69.6 </td>
+                    <td>93.3 </td>
+                    <td>81.8 </td>
+                    <td>95.8 </td>
+                    <td>90.7 </td>
+                    <td>78.8 </td>
+                    <td>83.6  </td>
+                </tr>
+                <tr>
+                    <td>J. Li et al.</td>
+                    <td>C&amp;G (2021)</td>
+                    <td>84.0 </td>
+                    <td>43.1 </td>
+                    <td>83.5 </td>
+                    <td>76.7 </td>
+                    <td>77.9 </td>
+                    <td>71.4 </td>
+                    <td>89.8 </td>
+                    <td>82.0 </td>
+                    <td>69.0 </td>
+                    <td>67.5 </td>
+                    <td>80.1 </td>
+                    <td>74.4 </td>
+                    <td>50.7 </td>
+                    <td>53.5 </td>
+                    <td>53.0 </td>
+                    <td>69.5 </td>
+                    <td>67.6 </td>
+                    <td>87.3 </td>
+                    <td>71.2  </td>
+                </tr>
+                <tr>
+                    <td>J. Li et al.</td>
+                    <td>JCST (2021)</td>
+                    <td>89.3 </td>
+                    <td>43.3 </td>
+                    <td>92.2 </td>
+                    <td>83.1 </td>
+                    <td>84.1 </td>
+                    <td>79.0 </td>
+                    <td>94.5 </td>
+                    <td>88.6 </td>
+                    <td>76.2 </td>
+                    <td>90.4 </td>
+                    <td>87.0 </td>
+                    <td>80.7 </td>
+                    <td>61.6 </td>
+                    <td>75.3 </td>
+                    <td>53.1 </td>
+                    <td>91.1 </td>
+                    <td>81.9 </td>
+                    <td>93.4 </td>
+                    <td>80.3  </td>
+                </tr>
+                <tr>
+                    <td>H. Huang et al.</td>
+                    <td>TVCG (2022)</td>
+                    <td>92.5 </td>
+                    <td>51.5 </td>
+                    <td>99.2 </td>
+                    <td>90.7 </td>
+                    <td>92.1 </td>
+                    <td>92.2 </td>
+                    <td>97.7 </td>
+                    <td>98.4 </td>
+                    <td>91.3 </td>
+                    <td>90.7 </td>
+                    <td>66.3 </td>
+                    <td>91.7 </td>
+                    <td>75.3 </td>
+                    <td>95.9 </td>
+                    <td>92.1 </td>
+                    <td>99.0 </td>
+                    <td>94.2 </td>
+                    <td>89.8 </td>
+                    <td>88.9  </td>
+                </tr>
+                <tr>
+                    <td>X. Tian et al.</td>
+                    <td>ECCV (2022)</td>
+                    <td>98.7 </td>
+                    <td>68.4 </td>
+                    <td>99.9 </td>
+                    <td>97.5 </td>
+                    <td>98.3 </td>
+                    <td>93.0 </td>
+                    <td>99.9 </td>
+                    <td>99.4 </td>
+                    <td>95.1 </td>
+                    <td>97.9 </td>
+                    <td>99.1 </td>
+                    <td>96.9 </td>
+                    <td>85.5 </td>
+                    <td>97.0 </td>
+                    <td>90.3 </td>
+                    <td>96.3 </td>
+                    <td>95.1 </td>
+                    <td>100.0 </td>
+                    <td>94.9  </td>
+                </tr>
+                <tr>
+                    <td>X. Tian et al.</td>
+                    <td>ECCV (2022)</td>
+                    <td>98.1 </td>
+                    <td>65.0 </td>
+                    <td>98.8 </td>
+                    <td>95.2 </td>
+                    <td>97.0 </td>
+                    <td>91.9 </td>
+                    <td>99.8 </td>
+                    <td>97.3 </td>
+                    <td>97.1 </td>
+                    <td>95.9 </td>
+                    <td>83.8 </td>
+                    <td>94.8 </td>
+                    <td>89.3 </td>
+                    <td>95.9 </td>
+                    <td>94.2 </td>
+                    <td>99.6 </td>
+                    <td>98.7 </td>
+                    <td>92.5 </td>
+                    <td>93.6  </td>
+                </tr>
+                <tr>
+                    <td>F. Liu et al.</td>
+                    <td>TIE (2022)</td>
+                    <td>87.1 </td>
+                    <td>36.7 </td>
+                    <td>91.7 </td>
+                    <td>78.8 </td>
+                    <td>79.2 </td>
+                    <td>82.5 </td>
+                    <td>92.8 </td>
+                    <td>86.1 </td>
+                    <td>78.0 </td>
+                    <td>90.2 </td>
+                    <td>83.4 </td>
+                    <td>72.0 </td>
+                    <td>52.3 </td>
+                    <td>72.8 </td>
+                    <td>55.9 </td>
+                    <td>86.9 </td>
+                    <td>77.8 </td>
+                    <td>93.0 </td>
+                    <td>77.6  </td>
+                </tr>
+                <tr>
+                    <td>M. Stoiber et al.</td>
+                    <td>IJCV (2022)</td>
+                    <td>96.5 </td>
+                    <td>66.8 </td>
+                    <td>99.0 </td>
+                    <td>95.8 </td>
+                    <td>95.0 </td>
+                    <td>95.9 </td>
+                    <td>100.0 </td>
+                    <td>96.6 </td>
+                    <td>95.0 </td>
+                    <td>94.4 </td>
+                    <td>79.0 </td>
+                    <td>94.7 </td>
+                    <td>89.8 </td>
+                    <td>95.7 </td>
+                    <td>93.6 </td>
+                    <td>99.6 </td>
+                    <td>97.6 </td>
+                    <td>92.2 </td>
+                    <td>93.2  </td>
+                </tr>
+                <tr>
+                    <td>Q. Wang et al.</td>
+                    <td>TIE (2023)</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>93.6  </td>
+                </tr>
+                <tr>
+                    <td>X. Song et al.</td>
+                    <td>CGF(2023)</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>93.2  </td>
+                </tr>
+                <tr>
+                    <td>N. Lv et al.</td>
+                    <td>AEI (2024)</td>
+                    <td>96.7 </td>
+                    <td>53.8 </td>
+                    <td>99.4 </td>
+                    <td>96.0 </td>
+                    <td>98.1 </td>
+                    <td>98.0 </td>
+                    <td>99.7 </td>
+                    <td>98.0 </td>
+                    <td>95.0 </td>
+                    <td>97.8 </td>
+                    <td>84.8 </td>
+                    <td>97.1 </td>
+                    <td>92.6 </td>
+                    <td>96.0 </td>
+                    <td>96.3 </td>
+                    <td>99.9 </td>
+                    <td>98.8 </td>
+                    <td>95.7 </td>
+                    <td>94.1  </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
 </html>
