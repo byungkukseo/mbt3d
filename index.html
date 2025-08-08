@@ -111,7 +111,10 @@
     
     <script type="text/javascript">
     $(document).ready(function () {
-      $('table.display').DataTable();
+      $('#table1').DataTable();
+      $('#table2').DataTable();
+      $('#table3').DataTable();
+      $('#table4').DataTable();
     });
     </script>
 </head>
@@ -250,7 +253,7 @@
         <h2>Performance Comparison (SR (%))</h2>
         
         <h3>Regular scene</h3>
-        <table class="display">
+        <table id="table1">
             <thead>
                 <tr>
                     <th colspan="2">Method</th>
@@ -832,7 +835,7 @@
         </table>
         
         <h3>Dynamic Light scene</h3>
-        <table class="display">
+        <table id="table2">
             <thead>
                 <tr>
                     <th colspan="2">Method</th>
@@ -1414,7 +1417,7 @@
         </table>
         
         <h3>Noisy (+ Dyanmic Light) scene</h3>
-        <table class="display">
+        <table id="table3">
             <thead>
                 <tr>
                     <th colspan="2">Method</th>
@@ -1996,7 +1999,7 @@
         </table>
         
         <h3>Occlusion (+ Dynamic Light) scene</h3>
-        <table class="display">
+        <table id="table4">
             <thead>
                 <tr>
                     <th colspan="2">Method</th>
