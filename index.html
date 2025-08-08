@@ -103,6 +103,16 @@
             }
           }
     </style>
+        <script>
+      window.addEventListener('resize', function() {
+        const scaleBar = document.querySelector('.scale-bar');
+        if (window.innerWidth <= 768) {
+          scaleBar.style.display = 'block';
+        } else {
+          scaleBar.style.display = 'none';
+        }
+      });
+    </script>
 </head>
 <body>
     <h1>Monocular Model-Based 3D Object Tracking Methods</h1>
@@ -2571,16 +2581,6 @@
     $(document).ready(function () {
       $('.datatable').DataTable();
     });
-    </script>
-    <script>
-      window.addEventListener('resize', function() {
-        const scaleBar = document.querySelector('.scale-bar');
-        if (window.innerWidth <= 768) {
-          scaleBar.style.display = 'block';
-        } else {
-          scaleBar.style.display = 'none';
-        }
-      });
     </script>
 </body>
 </html>
