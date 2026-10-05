@@ -180,14 +180,14 @@
         .import-ranks-updated .top-rank { font-weight: bold; }
 
         .latex-download-link {
-            display: block;
-            width: fit-content;
-            margin: 0 0 6px 0;
+            float: right;
+            display: inline-block;
+            margin: 4px 0 6px 12px;
             font-weight: 500;
             color: #0366d6;
             text-decoration: none;
             cursor: pointer;
-            text-align: left;
+            text-align: right;
         }
         .latex-download-link:hover { text-decoration: underline; }
 
@@ -3216,7 +3216,17 @@ shfts, JEI (2025).</li>
                 event.preventDefault();
                 downloadLatex(tableId, caption, filename);
             });
-            table.parentNode.insertBefore(link, table);
+            const wrapper = document.getElementById(tableId + '_wrapper');
+            if (wrapper) {
+                const lengthControl = wrapper.querySelector('.dataTables_length');
+                if (lengthControl) {
+                    lengthControl.insertAdjacentElement('afterend', link);
+                } else {
+                    wrapper.insertBefore(link, wrapper.firstChild);
+                }
+            } else {
+                table.parentNode.insertBefore(link, table);
+            }
         });
     }
 
