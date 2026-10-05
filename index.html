@@ -121,21 +121,139 @@
               display: block;
             }
           }
+
+        /* Only the dataset table adopts the performance table geometry. */
+        #rbot-dataset { table-layout: fixed; }
+        #rbot-dataset th, #rbot-dataset td {
+            box-sizing: border-box;
+            padding-left: 0;
+            padding-right: 0;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            min-width: 0;
+        }
+        /* Interactive data import controls. Existing table colors/text remain unchanged. */
+        .data-upload-panel {
+            margin: 24px 0 30px;
+            padding: 16px;
+            border: 1px solid #dfe2e5;
+            border-radius: 4px;
+            background: #fafbfc;
+            white-space: normal;
+        }
+        .data-upload-panel h3 { margin: 0 0 8px; }
+        .data-upload-panel p { margin: 6px 0 12px; line-height: 1.45; }
+        .data-upload-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: end;
+        }
+        .data-upload-field { display: flex; flex-direction: column; gap: 5px; }
+        .data-upload-field label { font-weight: 500; }
+        .data-upload-field select,
+        .data-upload-field input[type="file"],
+        .data-upload-panel button {
+            font-family: inherit;
+            font-size: 12px;
+        }
+        .data-upload-field select,
+        .data-upload-field input[type="file"] {
+            min-height: 32px;
+            padding: 4px 6px;
+            border: 1px solid #c8ccd0;
+            border-radius: 3px;
+            background: white;
+        }
+        .data-upload-panel button {
+            min-height: 32px;
+            padding: 6px 12px;
+            border: 1px solid #aab2ba;
+            border-radius: 3px;
+            background: #fff;
+            cursor: pointer;
+        }
+        .data-upload-panel button:hover { background: #f1f3f5; }
+        #import-status { margin-top: 10px; font-weight: 500; }
+        #import-status.success { color: #176b2c; }
+        #import-status.error { color: #a32121; }
+        .import-ranks-updated .top-rank { font-weight: bold; }
+
+        .latex-download-link {
+            display: inline-block;
+            margin: 4px 0 10px;
+            font-weight: 500;
+            color: #0366d6;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .latex-download-link:hover { text-decoration: underline; }
+
+        /* GitHub Pages admin UI gate: convenience only, not server-side security. */
+        #data-upload-panel { display: none; }
+        .admin-access-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0 0;
+        }
+        .admin-access-button {
+            font-family: inherit;
+            font-size: 11px;
+            padding: 4px 9px;
+            border: 1px solid #c8ccd0;
+            border-radius: 3px;
+            background: #fff;
+            cursor: pointer;
+        }
+        .admin-access-button:hover { background: #f1f3f5; }
+        .admin-access-status {
+            font-size: 11px;
+            color: #57606a;
+        }
     </style>
 </head>
 <body>
     <h1>Monocular Model-Based 3D Object Tracking Methods</h1>
     <br>
     <br> <b>** Update: July 2026. Please send me your results via email (byungkuk.seo@etri.re.kr) for the lastest updates!</b>
+        <div class="admin-access-bar">
+            <span class="admin-access-status" id="admin-access-status"></span>
+            <button type="button" class="admin-access-button" id="admin-access-button">Admin Login</button>
+        </div>
+        <div class="data-upload-panel" id="data-upload-panel">
+            <h3>Add new performance data</h3>
+            <p>Upload a CSV or TSV file. Expected columns: <b>Method, Publication, Year, Ape, Soda, Vise, Soup, Camera, Can, Cat, Clown, Cube, Driller, Duck, Egg, Glue, Iron, Candy, Lamp, Phone, Squirrel, Avg.</b> Missing values may be left blank or written as "-". After import, First/Second/Third cell colors are recalculated automatically for the selected table.</p>
+            <div class="data-upload-grid">
+                <div class="data-upload-field">
+                    <label for="target-table">Target table</label>
+                    <select id="target-table">
+                        <option value="table1">Regular scene</option>
+                        <option value="table2">Dynamic Light scene</option>
+                        <option value="table3">Noisy (+ Dyanmic Light) scene</option>
+                        <option value="table4">Occlusion (+ Dynamic Light) scene</option>
+                    </select>
+                </div>
+                <div class="data-upload-field">
+                    <label for="data-file">Data file</label>
+                    <input id="data-file" type="file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values">
+                </div>
+                <button type="button" id="import-data-button">Add data</button>
+                <button type="button" id="download-template-button">Download CSV template</button>
+            </div>
+            <div id="import-status" aria-live="polite"></div>
+        </div>
+
     <br>
     <br>
     <h2>## RBOT Dataset (<a href="https://www.mi.hs-rm.de/~schwan/research/RBOT/">https://github.com/henningtjaden/RBOT</a>)</h2>
 
     <div class="table-container">
-        <table>
+        <table id="rbot-dataset">
             <thead>
                 <tr>
-                    <th colspan="2">Appearance</th>
+                    <th colspan="3">Appearance</th>
                     <th>Ape</th>
                     <th>Soda</th>
                     <th>Vise</th>
@@ -159,7 +277,7 @@
             <tbody>
                 <tr>
                     <td rowspan="2">[H. Tjaden et al.] <br> TPAMI (2019)</td>
-                    <td>well-textured</td>
+                    <td colspan="2">well-textured</td>
                     <td></td>
                     <td class="well-textured"></td>
                     <td></td>
@@ -180,7 +298,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td>weakly-textured</td>
+                    <td colspan="2">weakly-textured</td>
                     <td class="weakly-textured"></td>
                     <td></td>
                     <td class="weakly-textured"></td>
@@ -202,7 +320,7 @@
                 </tr>
                 <tr>
                     <td rowspan="2">[X. Sun et al.] <br> TCSVT (2021)</td>
-                    <td>very-distinct</td>
+                    <td colspan="2">very-distinct</td>
                     <td class="very-distinct"></td>
                     <td class="very-distinct"></td>
                     <td class="very-distinct"></td>
@@ -223,7 +341,7 @@
                     <td class="very-distinct"></td>
                 </tr>
                 <tr>
-                    <td>less-distinct</td>
+                    <td colspan="2">less-distinct</td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -255,32 +373,34 @@
         <table id="table1">
             <thead>
                <tr>
-                    <th colspan="2">Method</th>
-                    <th>Ape</th>
-                    <th>Soda</th>
-                    <th>Vise</th>
-                    <th>Soup</th>
-                    <th>Camera</th>
-                    <th>Can</th>
-                    <th>Cat</th>
-                    <th>Clown</th>
-                    <th>Cube</th>
-                    <th>Driller</th>
-                    <th>Duck</th>
-                    <th>Egg</th>
-                    <th>Glue</th>
-                    <th>Iron</th>
-                    <th>Candy</th>
-                    <th>Lamp</th>
-                    <th>Phone</th>
-                    <th>Squirrel</th>
-                    <th>Avg.</th>
+                    <th colspan="3">Method</th>
+                    <th rowspan="2">Ape</th>
+                    <th rowspan="2">Soda</th>
+                    <th rowspan="2">Vise</th>
+                    <th rowspan="2">Soup</th>
+                    <th rowspan="2">Camera</th>
+                    <th rowspan="2">Can</th>
+                    <th rowspan="2">Cat</th>
+                    <th rowspan="2">Clown</th>
+                    <th rowspan="2">Cube</th>
+                    <th rowspan="2">Driller</th>
+                    <th rowspan="2">Duck</th>
+                    <th rowspan="2">Egg</th>
+                    <th rowspan="2">Glue</th>
+                    <th rowspan="2">Iron</th>
+                    <th rowspan="2">Candy</th>
+                    <th rowspan="2">Lamp</th>
+                    <th rowspan="2">Phone</th>
+                    <th rowspan="2">Squirrel</th>
+                    <th rowspan="2">Avg.</th>
                 </tr>
+           <tr><th>Method</th><th>Publication</th><th>Year</th></tr>
            </thead>
         <tbody>
     <tr>
         <td>G. Wang et al. (a)</td>
-        <td>VC (2015)</td>
+        <td>VC</td>
+        <td>2015</td>
         <td>13.3</td>
         <td>13.3</td>
         <td>16.1</td>
@@ -303,7 +423,8 @@
     </tr>
     <tr>
         <td>G. Wang et al. (b)</td>
-        <td>VC (2015)</td>
+        <td>VC</td>
+        <td>2015</td>
         <td>5.5</td>
         <td>3.9</td>
         <td>5.9</td>
@@ -326,7 +447,8 @@
     </tr>
     <tr>
         <td>H. Tjaden et al. (c)</td>
-        <td>ICCV (2017)</td>
+        <td>ICCV</td>
+        <td>2017</td>
         <td>62.1</td>
         <td>30.5</td>
         <td>95.8</td>
@@ -349,7 +471,8 @@
     </tr>
     <tr>
         <td>B. Wang et al. (d)</td>
-        <td>MTAP (2019)</td>
+        <td>MTAP</td>
+        <td>2019</td>
         <td>22.4</td>
         <td>19.4</td>
         <td>22.9</td>
@@ -372,7 +495,8 @@
     </tr>
     <tr>
         <td>L. Zhong et al. (e)</td>
-        <td>IJCV (2019)</td>
+        <td>IJCV</td>
+        <td>2019</td>
         <td>82.6</td>
         <td>40.1</td>
         <td>92.6</td>
@@ -395,7 +519,8 @@
     </tr>
     <tr>
         <td>H. Tjaden et al.</td>
-        <td>TPAMI (2019)</td>
+        <td>TPAMI</td>
+        <td>2019</td>
         <td>85.0</td>
         <td>39.0</td>
         <td>98.9</td>
@@ -418,7 +543,8 @@
     </tr>
     <tr>
         <td>H. Huang et al.</td>
-        <td>CGF (2020)</td>
+        <td>CGF</td>
+        <td>2020</td>
         <td>91.9</td>
         <td>44.8</td>
         <td class="second-rank">99.7</td>
@@ -441,7 +567,8 @@
     </tr>
     <tr>
         <td>L. Zhong et al.</td>
-        <td>TIP (2020)</td>
+        <td>TIP</td>
+        <td>2020</td>
         <td>88.8</td>
         <td>41.3</td>
         <td>94.0</td>
@@ -464,7 +591,8 @@
     </tr>
     <tr>
         <td>M. Stoiber et al.</td>
-        <td>ACCV (2020)</td>
+        <td>ACCV</td>
+        <td>2020</td>
         <td>96.4</td>
         <td>53.2</td>
         <td>98.8</td>
@@ -487,7 +615,8 @@
     </tr>
     <tr>
         <td>X. Sun et al.</td>
-        <td>TCSVT (2021)</td>
+        <td>TCSVT</td>
+        <td>2021</td>
         <td>67.2</td>
         <td>25.2</td>
         <td>80.7</td>
@@ -510,7 +639,8 @@
     </tr>
     <tr>
         <td>X. Sun et al. (1)</td>
-        <td>TCSVT (2021)</td>
+        <td>TCSVT</td>
+        <td>2021</td>
         <td>93.0</td>
         <td>55.2</td>
         <td>99.3</td>
@@ -533,7 +663,8 @@
     </tr>
     <tr>
         <td>J. Li et al.</td>
-        <td>C&amp;G (2021)</td>
+        <td>C&amp;G</td>
+        <td>2021</td>
         <td>90.0</td>
         <td>47.4</td>
         <td>88.4</td>
@@ -556,7 +687,8 @@
     </tr>
     <tr>
         <td>J. Li et al.</td>
-        <td>JCST (2021)</td>
+        <td>JCST</td>
+        <td>2021</td>
         <td>92.8</td>
         <td>42.6</td>
         <td>96.8</td>
@@ -579,7 +711,8 @@
     </tr>
     <tr>
         <td>H. Huang et al.</td>
-        <td>TVCG (2022)</td>
+        <td>TVCG</td>
+        <td>2022</td>
         <td>94.6</td>
         <td>49.4</td>
         <td>99.5</td>
@@ -602,7 +735,8 @@
     </tr>
     <tr>
         <td>X. Tian et al. (2)</td>
-        <td>ECCV (2022)</td>
+        <td>ECCV</td>
+        <td>2022</td>
         <td class="second-rank">99.8</td>
         <td class="top-rank"><b>67.1</b></td>
         <td class="top-rank"><b>100.0</b></td>
@@ -610,7 +744,7 @@
         <td class="third-rank">97.3</td>
         <td>93.7</td>
         <td class="top-rank"><b>100.0</b></td>
-        <<td class="second-rank">99.4</td>
+        <td class="second-rank">99.4</td>
         <td class="top-rank"><b>97.4</b></td>
         <td class="third-rank">97.6</td>
         <td class="top-rank"><b>99.3</b></td>
@@ -625,7 +759,8 @@
     </tr>
     <tr>
         <td>X. Tian et al. (f)</td>
-        <td>ECCV (2022)</td>
+        <td>ECCV</td>
+        <td>2022</td>
         <td class="top-rank"><b>99.9</b></td>
         <td class="second-rank">65.8</td>
         <td>99.4</td>
@@ -648,7 +783,8 @@
     </tr>
     <tr>
         <td>F. Liu et al.</td>
-        <td>TIE (2022)</td>
+        <td>TIE</td>
+        <td>2022</td>
         <td>93.7</td>
         <td>39.3</td>
         <td>98.4</td>
@@ -671,7 +807,8 @@
     </tr>
     <tr>
         <td>M. Stoiber et al.</td>
-        <td>IJCV (2022)</td>
+        <td>IJCV</td>
+        <td>2022</td>
         <td class="second-rank">98.8</td>
         <td class="third-rank">65.1</td>
         <td class="third-rank">99.6</td>
@@ -694,7 +831,8 @@
     </tr>
     <tr>
         <td>Q. Wang et al.</td>
-        <td>TIE (2023)</td>
+        <td>TIE</td>
+        <td>2023</td>
         <td>-</td>
         <td>-</td>
         <td>-</td>
@@ -717,7 +855,8 @@
     </tr>
     <tr>
         <td>X. Song et al. (3)</td>
-        <td>CGF (2023)</td>
+        <td>CGF</td>
+        <td>2023</td>
         <td>-</td>
         <td>-</td>
         <td>-</td>
@@ -740,7 +879,8 @@
     </tr>
     <tr>
         <td>N. Lv et al.</td>
-        <td>AEI (2024)</td>
+        <td>AEI</td>
+        <td>2024</td>
         <td class="third-rank">97.7</td>
         <td>54.2</td>
         <td class="third-rank">99.6</td>
@@ -763,7 +903,8 @@
     </tr>
     <tr>
         <td>K. Li et al.</td>
-        <td>JEI (2025)</td>
+        <td>JEI</td>
+        <td>2025</td>
         <td>-</td>
         <td>-</td>
         <td>-</td>
@@ -786,7 +927,8 @@
     </tr>
 	<tr style="background-color: #EBEBEB;">
 		<td>J. Chen et al. (*)(4) </td>
-		<td>TIM (2025)</td>
+		<td>TIM</td>
+        <td>2025</td>
         <td>98.2</td>
         <td>64.9</td>
         <td>99.4</td>
@@ -809,7 +951,8 @@
     </tr>
 	<tr style="background-color: #EBEBEB;">
 		<td>J. Chen et al. (*) </td>
-		<td>TIM (2025)</td>
+		<td>TIM</td>
+        <td>2025</td>
         <td>99.0</td>
         <td>85.0</td>
         <td>99.6</td>
@@ -849,7 +992,7 @@
         </ol>
         <script type="text/javascript">
         $(document).ready(function () {
-          $('#table1').DataTable();
+          $('#table1').DataTable({ pageLength: 100, order: [[2, 'desc']], searching: false });
         });
         </script>
     </div>
@@ -858,32 +1001,34 @@
         <table id="table2">
             <thead>
                <tr>
-                    <th colspan="2">Method</th>
-                    <th>Ape</th>
-                    <th>Soda</th>
-                    <th>Vise</th>
-                    <th>Soup</th>
-                    <th>Camera</th>
-                    <th>Can</th>
-                    <th>Cat</th>
-                    <th>Clown</th>
-                    <th>Cube</th>
-                    <th>Driller</th>
-                    <th>Duck</th>
-                    <th>Egg</th>
-                    <th>Glue</th>
-                    <th>Iron</th>
-                    <th>Candy</th>
-                    <th>Lamp</th>
-                    <th>Phone</th>
-                    <th>Squirrel</th>
-                    <th>Avg.</th>
+                    <th colspan="3">Method</th>
+                    <th rowspan="2">Ape</th>
+                    <th rowspan="2">Soda</th>
+                    <th rowspan="2">Vise</th>
+                    <th rowspan="2">Soup</th>
+                    <th rowspan="2">Camera</th>
+                    <th rowspan="2">Can</th>
+                    <th rowspan="2">Cat</th>
+                    <th rowspan="2">Clown</th>
+                    <th rowspan="2">Cube</th>
+                    <th rowspan="2">Driller</th>
+                    <th rowspan="2">Duck</th>
+                    <th rowspan="2">Egg</th>
+                    <th rowspan="2">Glue</th>
+                    <th rowspan="2">Iron</th>
+                    <th rowspan="2">Candy</th>
+                    <th rowspan="2">Lamp</th>
+                    <th rowspan="2">Phone</th>
+                    <th rowspan="2">Squirrel</th>
+                    <th rowspan="2">Avg.</th>
                 </tr>
+           <tr><th>Method</th><th>Publication</th><th>Year</th></tr>
            </thead>
         <tbody>
     <tr>
         <td>G. Wang et al. (a)</td>
-        <td>VC (2015)</td>
+        <td>VC</td>
+        <td>2015</td>
         <td>13.1</td>
         <td>12.2</td>
         <td>15.3</td>
@@ -906,7 +1051,8 @@
     </tr>
     <tr>
         <td>G. Wang et al. (b)</td>
-        <td>VC (2015)</td>
+        <td>VC</td>
+        <td>2015</td>
         <td>5.7</td>
         <td>3.9</td>
         <td>6.5</td>
@@ -929,7 +1075,8 @@
     </tr>
     <tr>
         <td>H. Tjaden et al. (c)</td>
-        <td>ICCV (2017)</td>
+        <td>ICCV</td>
+        <td>2017</td>
         <td>61.7</td>
         <td>32.0</td>
         <td>94.2</td>
@@ -952,7 +1099,8 @@
     </tr>
     <tr>
         <td>B. Wang et al. (d)</td>
-        <td>MTAP (2019)</td>
+        <td>MTAP</td>
+        <td>2019</td>
         <td>20.7</td>
         <td>19.9</td>
         <td>23.7</td>
@@ -975,7 +1123,8 @@
     </tr>
     <tr>
         <td>L. Zhong et al. (e)</td>
-        <td>IJCV (2019)</td>
+        <td>IJCV</td>
+        <td>2019</td>
         <td>81.8</td>
         <td>39.7</td>
         <td>91.5</td>
@@ -998,7 +1147,8 @@
     </tr>
     <tr>
         <td>H. Tjaden et al.</td>
-        <td>TPAMI (2019)</td>
+        <td>TPAMI</td>
+        <td>2019</td>
         <td>84.9</td>
         <td>42.0</td>
         <td>99.0</td>
@@ -1021,7 +1171,8 @@
     </tr>
     <tr>
         <td>H. Huang et al.</td>
-        <td>CGF (2020)</td>
+        <td>CGF</td>
+        <td>2020</td>
         <td>91.8</td>
         <td>42.3</td>
         <td>98.9</td>
@@ -1044,7 +1195,8 @@
     </tr>
     <tr>
         <td>L. Zhong et al.</td>
-        <td>TIP (2020)</td>
+        <td>TIP</td>
+        <td>2020</td>
         <td>89.7</td>
         <td>40.2</td>
         <td>92.7</td>
@@ -1067,7 +1219,8 @@
     </tr>
     <tr>
         <td>M. Stoiber et al.</td>
-        <td>ACCV (2020)</td>
+        <td>ACCV</td>
+        <td>2020</td>
         <td>96.5</td>
         <td>54.6</td>
         <td>99.1</td>
@@ -1090,7 +1243,8 @@
     </tr>
     <tr>
         <td>X. Sun et al.</td>
-        <td>TCSVT (2021)</td>
+        <td>TCSVT</td>
+        <td>2021</td>
         <td>71.2</td>
         <td>26.6</td>
         <td>81.1</td>
@@ -1113,7 +1267,8 @@
     </tr>
     <tr>
         <td>X. Sun et al. (1)</td>
-        <td>TCSVT (2021)</td>
+        <td>TCSVT</td>
+        <td>2021</td>
         <td>93.8</td>
         <td>55.9</td>
         <td class="third-rank">99.6</td>
@@ -1136,7 +1291,8 @@
     </tr>
     <tr>
         <td>J. Li et al.</td>
-        <td>C&amp;G (2021)</td>
+        <td>C&amp;G</td>
+        <td>2021</td>
         <td>89.1</td>
         <td>44.5</td>
         <td>92.1</td>
@@ -1159,7 +1315,8 @@
     </tr>
     <tr>
         <td>J. Li et al.</td>
-        <td>JCST (2021)</td>
+        <td>JCST</td>
+        <td>2021</td>
         <td>93.5</td>
         <td>43.1</td>
         <td>96.6</td>
@@ -1182,7 +1339,8 @@
     </tr>
     <tr>
         <td>H. Huang et al.</td>
-        <td>TVCG (2022)</td>
+        <td>TVCG</td>
+        <td>2022</td>
         <td>94.3</td>
         <td>48.3</td>
         <td>99.5</td>
@@ -1205,7 +1363,8 @@
     </tr>
     <tr>
         <td>X. Tian et al. (2)</td>
-        <td>ECCV (2022)</td>
+        <td>ECCV</td>
+        <td>2022</td>
         <td class="top-rank"><b>100.0</b></td>
         <td class="second-rank">64.5</td>
         <td class="top-rank"><b>99.8</b></td>
@@ -1228,7 +1387,8 @@
     </tr>
     <tr>
         <td>X. Tian et al. (f)</td>
-        <td>ECCV (2022)</td>
+        <td>ECCV</td>
+        <td>2022</td>
         <td class="second-rank">99.6</td>
         <td class="third-rank">63.9</td>
         <td class="second-rank">99.7</td>
@@ -1251,7 +1411,8 @@
     </tr>
     <tr>
         <td>F. Liu et al.</td>
-        <td>TIE (2022)</td>
+        <td>TIE</td>
+        <td>2022</td>
         <td>93.5</td>
         <td>38.2</td>
         <td>98.4</td>
@@ -1274,7 +1435,8 @@
     </tr>
     <tr>
         <td>M. Stoiber et al.</td>
-        <td>IJCV (2022)</td>
+        <td>IJCV</td>
+        <td>2022</td>
         <td>98.2</td>
         <td class="top-rank"><b>65.2</b></td>
         <td>99.2</td>
@@ -1297,7 +1459,8 @@
     </tr>
     <tr>
         <td>Q. Wang et al.</td>
-        <td>TIE (2023)</td>
+        <td>TIE</td>
+        <td>2023</td>
         <td>-</td>
         <td>-</td>
         <td>-</td>
@@ -1320,7 +1483,8 @@
     </tr>
     <tr>
         <td>X. Song et al. (3)</td>
-        <td>CGF (2023)</td>
+        <td>CGF</td>
+        <td>2023</td>
         <td>-</td>
         <td>-</td>
         <td>-</td>
@@ -1343,7 +1507,8 @@
     </tr>
     <tr>
         <td>N. Lv et al.</td>
-        <td>AEI (2024)</td>
+        <td>AEI</td>
+        <td>2024</td>
         <td class="third-rank">98.5</td>
         <td>49.7</td>
         <td class="top-rank"><b>99.8</b></td>
@@ -1366,7 +1531,8 @@
     </tr>
     <tr>
         <td>K. Li et al.</td>
-        <td>JEI (2025)</td>
+        <td>JEI</td>
+        <td>2025</td>
         <td>-</td>
         <td>-</td>
         <td>-</td>
@@ -1389,7 +1555,8 @@
     </tr>
 	<tr style="background-color: #EBEBEB;">
 		<td>J. Chen et al. (*)(4) </td>
-		<td>TIM (2025)</td>
+		<td>TIM</td>
+        <td>2025</td>
         <td>98.8</td>
         <td>64.1</td>
         <td>99.6</td>
@@ -1412,7 +1579,8 @@
     </tr>
 	<tr style="background-color: #EBEBEB;">
 		<td>J. Chen et al. (*)</td>
-		<td>TIM (2025)</td>
+		<td>TIM</td>
+        <td>2025</td>
         <td>99.0</td>
         <td>80.5</td>
         <td>99.8</td>
@@ -1452,7 +1620,7 @@
         </ol>
         <script type="text/javascript">
         $(document).ready(function () {
-          $('#table2').DataTable();
+          $('#table2').DataTable({ pageLength: 100, order: [[2, 'desc']], searching: false });
         });
     </script>
     </div>
@@ -1462,32 +1630,34 @@
         <table id="table3">
             <thead>
                   <tr>
-                    <th colspan="2">Method</th>
-                    <th>Ape</th>
-                    <th>Soda</th>
-                    <th>Vise</th>
-                    <th>Soup</th>
-                    <th>Camera</th>
-                    <th>Can</th>
-                    <th>Cat</th>
-                    <th>Clown</th>
-                    <th>Cube</th>
-                    <th>Driller</th>
-                    <th>Duck</th>
-                    <th>Egg</th>
-                    <th>Glue</th>
-                    <th>Iron</th>
-                    <th>Candy</th>
-                    <th>Lamp</th>
-                    <th>Phone</th>
-                    <th>Squirrel</th>
-                    <th>Avg.</th>
+                    <th colspan="3">Method</th>
+                    <th rowspan="2">Ape</th>
+                    <th rowspan="2">Soda</th>
+                    <th rowspan="2">Vise</th>
+                    <th rowspan="2">Soup</th>
+                    <th rowspan="2">Camera</th>
+                    <th rowspan="2">Can</th>
+                    <th rowspan="2">Cat</th>
+                    <th rowspan="2">Clown</th>
+                    <th rowspan="2">Cube</th>
+                    <th rowspan="2">Driller</th>
+                    <th rowspan="2">Duck</th>
+                    <th rowspan="2">Egg</th>
+                    <th rowspan="2">Glue</th>
+                    <th rowspan="2">Iron</th>
+                    <th rowspan="2">Candy</th>
+                    <th rowspan="2">Lamp</th>
+                    <th rowspan="2">Phone</th>
+                    <th rowspan="2">Squirrel</th>
+                    <th rowspan="2">Avg.</th>
                 </tr>
+           <tr><th>Method</th><th>Publication</th><th>Year</th></tr>
            </thead>
         <tbody>
     <tr>
         <td>G. Wang et al. (a)</td>
-        <td>VC (2015)</td>
+        <td>VC</td>
+        <td>2015</td>
         <td>10.4</td>
         <td>10.3</td>
         <td>12.3</td>
@@ -1510,7 +1680,8 @@
     </tr>
     <tr>
         <td>G. Wang et al. (b)</td>
-        <td>VC (2015)</td>
+        <td>VC</td>
+        <td>2015</td>
         <td>2.5</td>
         <td>2.6</td>
         <td>1.1</td>
@@ -1533,7 +1704,8 @@
     </tr>
     <tr>
         <td>H. Tjaden et al. (c)</td>
-        <td>ICCV (2017)</td>
+        <td>ICCV</td>
+        <td>2017</td>
         <td>55.9</td>
         <td>35.3</td>
         <td>75.4</td>
@@ -1556,7 +1728,8 @@
     </tr>
     <tr>
         <td>B. Wang et al. (d)</td>
-        <td>MTAP (2019)</td>
+        <td>MTAP</td>
+        <td>2019</td>
         <td>19.8</td>
         <td>21.4</td>
         <td>21.2</td>
@@ -1579,7 +1752,8 @@
     </tr>
     <tr>
         <td>L. Zhong et al. (e)</td>
-        <td>IJCV (2019)</td>
+        <td>IJCV</td>
+        <td>2019</td>
         <td>80.5</td>
         <td>35.0</td>
         <td>80.9</td>
@@ -1602,7 +1776,8 @@
     </tr>
     <tr>
         <td>H. Tjaden et al.</td>
-        <td>TPAMI (2019)</td>
+        <td>TPAMI</td>
+        <td>2019</td>
         <td>77.5</td>
         <td>44.5</td>
         <td>91.5</td>
@@ -1625,7 +1800,8 @@
     </tr>
     <tr>
         <td>H. Huang et al.</td>
-        <td>CGF (2020)</td>
+        <td>CGF</td>
+        <td>2020</td>
         <td>89.0</td>
         <td>45.0</td>
         <td>89.5</td>
@@ -1648,7 +1824,8 @@
     </tr>
     <tr>
         <td>L. Zhong et al.</td>
-        <td>TIP (2020)</td>
+        <td>TIP</td>
+        <td>2020</td>
         <td>79.3</td>
         <td>35.2</td>
         <td>82.6</td>
@@ -1671,7 +1848,8 @@
     </tr>
     <tr>
         <td>M. Stoiber et al.</td>
-        <td>ACCV (2020)</td>
+        <td>ACCV</td>
+        <td>2020</td>
         <td>91.9</td>
         <td>53.3</td>
         <td>90.2</td>
@@ -1694,7 +1872,8 @@
     </tr>
     <tr>
         <td>X. Sun et al.</td>
-        <td>TCSVT (2021)</td>
+        <td>TCSVT</td>
+        <td>2021</td>
         <td>72.0</td>
         <td>25.1</td>
         <td>79.1</td>
@@ -1717,7 +1896,8 @@
     </tr>
     <tr>
         <td>X. Sun et al. (1)</td>
-        <td>TCSVT (2021)</td>
+        <td>TCSVT</td>
+        <td>2021</td>
         <td>92.5</td>
         <td>56.2</td>
         <td class="top-rank"><b>98.0</b></td>
@@ -1740,7 +1920,8 @@
     </tr>
     <tr>
         <td>J. Li et al.</td>
-        <td>C&amp;G (2021)</td>
+        <td>C&amp;G</td>
+        <td>2021</td>
         <td>83.8</td>
         <td>45.9</td>
         <td>79.2</td>
@@ -1763,7 +1944,8 @@
     </tr>
     <tr>
         <td>J. Li et al.</td>
-        <td>JCST (2021)</td>
+        <td>JCST</td>
+        <td>2021</td>
         <td>89.1</td>
         <td>44.0</td>
         <td>91.6</td>
@@ -1786,7 +1968,8 @@
     </tr>
     <tr>
         <td>H. Huang et al.</td>
-        <td>TVCG (2022)</td>
+        <td>TVCG</td>
+        <td>2022</td>
         <td>91.0</td>
         <td>49.1</td>
         <td class="third-rank">95.6</td>
@@ -1809,7 +1992,8 @@
     </tr>
     <tr>
         <td>X. Tian et al. (2)</td>
-        <td>ECCV (2022)</td>
+        <td>ECCV</td>
+        <td>2022</td>
         <td class="top-rank"><b>99.3</b></td>
         <td class="top-rank"><b>62.0</b></td>
         <td class="second-rank">95.8</td>
@@ -1832,7 +2016,8 @@
     </tr>
     <tr>
         <td>X. Tian et al. (f)</td>
-        <td>ECCV (2022)</td>
+        <td>ECCV</td>
+        <td>2022</td>
         <td class="second-rank">98.5</td>
         <td class="third-rank">61.4</td>
         <td>95.1</td>
@@ -1855,7 +2040,8 @@
     </tr>
     <tr>
         <td>F. Liu et al.</td>
-        <td>TIE (2022)</td>
+        <td>TIE</td>
+        <td>2022</td>
         <td>84.7</td>
         <td>33.0</td>
         <td>88.8</td>
@@ -1878,7 +2064,8 @@
     </tr>
     <tr>
         <td>M. Stoiber et al.</td>
-        <td>IJCV (2022)</td>
+        <td>IJCV</td>
+        <td>2022</td>
         <td>96.9</td>
         <td class="second-rank">61.9</td>
         <td>95.4</td>
@@ -1901,7 +2088,8 @@
     </tr>
     <tr>
         <td>Q. Wang et al.</td>
-        <td>TIE (2023)</td>
+        <td>TIE</td>
+        <td>2023</td>
         <td>-</td>
         <td>-</td>
         <td>-</td>
@@ -1924,7 +2112,8 @@
     </tr>
     <tr>
         <td>X. Song et al. (3)</td>
-        <td>CGF (2023)</td>
+        <td>CGF</td>
+        <td>2023</td>
         <td>-</td>
         <td>-</td>
         <td>-</td>
@@ -1947,7 +2136,8 @@
     </tr>
     <tr>
         <td>N. Lv et al.</td>
-        <td>AEI (2024)</td>
+        <td>AEI</td>
+        <td>2024</td>
         <td class="third-rank">98.0</td>
         <td>50.3</td>
         <td>95.1</td>
@@ -1970,7 +2160,8 @@
     </tr>
     <tr>
         <td>K. Li et al.</td>
-        <td>JEI (2025)</td>
+        <td>JEI</td>
+        <td>2025</td>
         <td>-</td>
         <td>-</td>
         <td>-</td>
@@ -1993,7 +2184,8 @@
     </tr>
 	<tr style="background-color: #EBEBEB;">
 		<td>J. Chen et al. (*)(4) </td>
-		<td>TIM (2025)</td>
+		<td>TIM</td>
+        <td>2025</td>
         <td>98.4 </td>
         <td>60.9 </td>
         <td>95.9 </td>
@@ -2016,7 +2208,8 @@
     </tr>
  	<tr style="background-color: #EBEBEB;">
 		<td>J. Chen et al. (*)</td>
-		<td>TIM (2025)</td>
+		<td>TIM</td>
+        <td>2025</td>
         <td>98.7 </td>
         <td>78.1 </td>
         <td>97.5 </td>
@@ -2056,7 +2249,7 @@
         </ol>
         <script type="text/javascript">
         $(document).ready(function () {
-          $('#table3').DataTable();
+          $('#table3').DataTable({ pageLength: 100, order: [[2, 'desc']], searching: false });
         });
         </script>
     </div>
@@ -2066,32 +2259,34 @@
         <table id="table4">
             <thead>
                 <tr>
-                    <th colspan="2">Method</th>
-                    <th>Ape</th>
-                    <th>Soda</th>
-                    <th>Vise</th>
-                    <th>Soup</th>
-                    <th>Camera</th>
-                    <th>Can</th>
-                    <th>Cat</th>
-                    <th>Clown</th>
-                    <th>Cube</th>
-                    <th>Driller</th>
-                    <th>Duck</th>
-                    <th>Egg</th>
-                    <th>Glue</th>
-                    <th>Iron</th>
-                    <th>Candy</th>
-                    <th>Lamp</th>
-                    <th>Phone</th>
-                    <th>Squirrel</th>
-                    <th>Avg.</th>
+                    <th colspan="3">Method</th>
+                    <th rowspan="2">Ape</th>
+                    <th rowspan="2">Soda</th>
+                    <th rowspan="2">Vise</th>
+                    <th rowspan="2">Soup</th>
+                    <th rowspan="2">Camera</th>
+                    <th rowspan="2">Can</th>
+                    <th rowspan="2">Cat</th>
+                    <th rowspan="2">Clown</th>
+                    <th rowspan="2">Cube</th>
+                    <th rowspan="2">Driller</th>
+                    <th rowspan="2">Duck</th>
+                    <th rowspan="2">Egg</th>
+                    <th rowspan="2">Glue</th>
+                    <th rowspan="2">Iron</th>
+                    <th rowspan="2">Candy</th>
+                    <th rowspan="2">Lamp</th>
+                    <th rowspan="2">Phone</th>
+                    <th rowspan="2">Squirrel</th>
+                    <th rowspan="2">Avg.</th>
                 </tr>
-            </thead>
+            <tr><th>Method</th><th>Publication</th><th>Year</th></tr>
+           </thead>
             <tbody>
     <tr>
         <td>G. Wang et al. (a)</td>
-        <td>VC (2015)</td>
+        <td>VC</td>
+        <td>2015</td>
         <td>12.1</td>
         <td>12.0</td>
         <td>14.6</td>
@@ -2114,7 +2309,8 @@
     </tr>
     <tr>
         <td>G. Wang et al. (b)</td>
-        <td>VC (2015)</td>
+        <td>VC</td>
+        <td>2015</td>
         <td>5.8</td>
         <td>3.2</td>
         <td>6.7</td>
@@ -2137,7 +2333,8 @@
     </tr>
     <tr>
         <td>H. Tjaden et al. (c)</td>
-        <td>ICCV (2017)</td>
+        <td>ICCV</td>
+        <td>2017</td>
         <td>55.2</td>
         <td>29.9</td>
         <td>82.4</td>
@@ -2160,7 +2357,8 @@
     </tr>
     <tr>
         <td>B. Wang et al. (d)</td>
-        <td>MTAP (2019)</td>
+        <td>MTAP</td>
+        <td>2019</td>
         <td>19.8</td>
         <td>21.4</td>
         <td>21.2</td>
@@ -2183,7 +2381,8 @@
     </tr>
     <tr>
         <td>L. Zhong et al. (e)</td>
-        <td>IJCV (2019)</td>
+        <td>IJCV</td>
+        <td>2019</td>
         <td>77.7</td>
         <td>37.3</td>
         <td>87.1</td>
@@ -2206,7 +2405,8 @@
     </tr>
     <tr>
         <td>H. Tjaden et al.</td>
-        <td>TPAMI (2019)</td>
+        <td>TPAMI</td>
+        <td>2019</td>
         <td>80.0</td>
         <td>42.7</td>
         <td>91.8</td>
@@ -2229,7 +2429,8 @@
     </tr>
     <tr>
         <td>H. Huang et al.</td>
-        <td>CGF (2020)</td>
+        <td>CGF</td>
+        <td>2020</td>
         <td>86.2</td>
         <td>46.3</td>
         <td>97.8</td>
@@ -2252,7 +2453,8 @@
     </tr>
     <tr>
         <td>L. Zhong et al.</td>
-        <td>TIP (2020)</td>
+        <td>TIP</td>
+        <td>2020</td>
         <td>83.9</td>
         <td>38.1</td>
         <td>92.4</td>
@@ -2275,7 +2477,8 @@
     </tr>
     <tr>
         <td>M. Stoiber et al.</td>
-        <td>ACCV (2020)</td>
+        <td>ACCV</td>
+        <td>2020</td>
         <td>90.8</td>
         <td>51.7</td>
         <td>95.9</td>
@@ -2298,7 +2501,8 @@
     </tr>
     <tr>
         <td>X. Sun et al.</td>
-        <td>TCSVT (2021)</td>
+        <td>TCSVT</td>
+        <td>2021</td>
         <td>71.2</td>
         <td>25.3</td>
         <td>81.5</td>
@@ -2321,7 +2525,8 @@
     </tr>
     <tr>
         <td>X. Sun et al. (1)</td>
-        <td>TCSVT (2021)</td>
+        <td>TCSVT</td>
+        <td>2021</td>
         <td>91.3</td>
         <td>56.7</td>
         <td>97.8</td>
@@ -2344,7 +2549,8 @@
     </tr>
     <tr>
         <td>J. Li et al.</td>
-        <td>C&amp;G (2021)</td>
+        <td>C&amp;G</td>
+        <td>2021</td>
         <td>84.0</td>
         <td>43.1</td>
         <td>83.5</td>
@@ -2367,7 +2573,8 @@
     </tr>
     <tr>
         <td>J. Li et al.</td>
-        <td>JCST (2021)</td>
+        <td>JCST</td>
+        <td>2021</td>
         <td>89.3</td>
         <td>43.3</td>
         <td>92.2</td>
@@ -2390,7 +2597,8 @@
     </tr>
     <tr>
         <td>H. Huang et al.</td>
-        <td>TVCG (2022)</td>
+        <td>TVCG</td>
+        <td>2022</td>
         <td>92.5</td>
         <td>51.5</td>
         <td class="third-rank">99.2</td>
@@ -2413,7 +2621,8 @@
     </tr>
     <tr>
         <td>X. Tian et al. (2)</td>
-        <td>ECCV (2022)</td>
+        <td>ECCV</td>
+        <td>2022</td>
         <td class="top-rank"><b>98.7</b></td>
         <td class="top-rank"><b>68.4</b></td>
         <td class="top-rank"><b>99.9</b></td>
@@ -2436,7 +2645,8 @@
     </tr>
     <tr>
         <td>X. Tian et al. (f)</td>
-        <td>ECCV (2022)</td>
+        <td>ECCV</td>
+        <td>2022</td>
         <td class="second-rank">98.1</td>
         <td class="third-rank">65.0</td>
         <td>98.8</td>
@@ -2459,7 +2669,8 @@
     </tr>
     <tr>
         <td>F. Liu et al.</td>
-        <td>TIE (2022)</td>
+        <td>TIE</td>
+        <td>2022</td>
         <td>87.1</td>
         <td>36.7</td>
         <td>91.7</td>
@@ -2482,7 +2693,8 @@
     </tr>
     <tr>
         <td>M. Stoiber et al.</td>
-        <td>IJCV (2022)</td>
+        <td>IJCV</td>
+        <td>2022</td>
         <td>96.5</td>
         <td class="second-rank">66.8</td>
         <td>99.0</td>
@@ -2505,7 +2717,8 @@
     </tr>
     <tr>
         <td>Q. Wang et al.</td>
-        <td>TIE (2023)</td>
+        <td>TIE</td>
+        <td>2023</td>
         <td>-</td>
         <td>-</td>
         <td>-</td>
@@ -2528,7 +2741,8 @@
     </tr>
     <tr>
         <td>X. Song et al. (3)</td>
-        <td>CGF (2023)</td>
+        <td>CGF</td>
+        <td>2023</td>
         <td>-</td>
         <td>-</td>
         <td>-</td>
@@ -2551,7 +2765,8 @@
     </tr>
     <tr>
         <td>N. Lv et al.</td>
-        <td>AEI (2024)</td>
+        <td>AEI</td>
+        <td>2024</td>
         <td class="third-rank">96.7</td>
         <td>53.8</td>
         <td class="second-rank">99.4</td>
@@ -2574,7 +2789,8 @@
     </tr>
     <tr>
         <td>K. Li et al.</td>
-        <td>JEI (2025)</td>
+        <td>JEI</td>
+        <td>2025</td>
         <td>-</td>
         <td>-</td>
         <td>-</td>
@@ -2597,7 +2813,8 @@
     </tr>
 	<tr style="background-color: #EBEBEB;">
 		<td>J. Chen et al. (*)(4) </td>
-		<td>TIM (2025)</td>
+		<td>TIM</td>
+        <td>2025</td>
         <td>96.2 </td>
         <td>62.6 </td>
         <td>98.5 </td>
@@ -2620,7 +2837,8 @@
     </tr>
   	<tr style="background-color: #EBEBEB;">
 		<td>J. Chen et al. (*)</td>
-		<td>TIM (2025)</td>
+		<td>TIM</td>
+        <td>2025</td>
         <td>97.3 </td>
         <td>78.1 </td>
         <td>99.4 </td>
@@ -2660,7 +2878,7 @@
         </ol>
         <script type="text/javascript">
         $(document).ready(function () {
-          $('#table4').DataTable();
+          $('#table4').DataTable({ pageLength: 100, order: [[2, 'desc']], searching: false });
         });
         </script>
     </div>
@@ -2708,5 +2926,414 @@ shfts, JEI (2025).</li>
 
 <li style="font-size:15px; line-height: 2.5em;">[J. Chen et al.] Robust 6dof pose tracking considering contour and interior correspondence uncertainty for ar assembly guidance, TIM (2025).</li>    
 </ul>
+
+<script>
+(function () {
+    function initializeDatasetAlignment() {
+        const dataset = document.getElementById('rbot-dataset');
+        const reference = document.getElementById('table1');
+        if (!dataset || !reference) return;
+        const datasetContainer = dataset.closest('.table-container');
+        const referenceContainer = reference.closest('.table-container');
+        const datasetHeading = datasetContainer.previousElementSibling;
+        const performanceHeading = Array.from(document.querySelectorAll('h2'))
+            .find(heading => heading.textContent.includes('Performance Comparison'));
+        // Keep the whole dataset block above the performance comparison.
+        if (performanceHeading && datasetHeading) {
+            performanceHeading.before(datasetHeading, datasetContainer);
+        }
+        // Performance includes Avg.; reserve its space without adding text or color.
+        const header = dataset.tHead.rows[0];
+        const columnCount = reference.tBodies[0].rows[0].cells.length;
+        let datasetColumns = Array.from(header.cells)
+            .reduce((sum, cell) => sum + cell.colSpan, 0);
+        while (datasetColumns < columnCount) {
+            const cell = document.createElement('th');
+            cell.setAttribute('aria-hidden', 'true');
+            header.appendChild(cell);
+            for (const row of dataset.tBodies[0].rows) {
+                const blank = row.insertCell();
+                blank.setAttribute('aria-hidden', 'true');
+            }
+            datasetColumns++;
+        }
+        const colgroup = document.createElement('colgroup');
+        for (let i = 0; i < columnCount; i++) colgroup.appendChild(document.createElement('col'));
+        dataset.insertBefore(colgroup, dataset.firstChild);
+        let pending = false;
+        function align() {
+            pending = false;
+            // A data row exposes all three columns covered by the Method colspan.
+            const row = Array.from(reference.tBodies[0].rows)
+                .find(row => row.cells.length === columnCount);
+            if (!row) return;
+            const rect = reference.getBoundingClientRect();
+            if (!rect.width) return;
+            Array.from(row.cells).forEach((cell, i) => {
+                colgroup.children[i].style.width = cell.getBoundingClientRect().width + 'px';
+            });
+            dataset.style.width = rect.width + 'px';
+            dataset.style.minWidth = rect.width + 'px';
+            dataset.style.maxWidth = rect.width + 'px';
+            dataset.style.marginLeft = (rect.left - referenceContainer.getBoundingClientRect().left
+                + referenceContainer.scrollLeft) + 'px';
+            datasetContainer.scrollLeft = referenceContainer.scrollLeft;
+        }
+        function schedule() {
+            if (!pending) { pending = true; requestAnimationFrame(align); }
+        }
+        window.addEventListener('resize', schedule);
+        window.addEventListener('load', schedule);
+        referenceContainer.addEventListener('scroll', () => {
+            datasetContainer.scrollLeft = referenceContainer.scrollLeft;
+        });
+        datasetContainer.addEventListener('scroll', () => {
+            referenceContainer.scrollLeft = datasetContainer.scrollLeft;
+        });
+        if (window.ResizeObserver) new ResizeObserver(schedule).observe(reference);
+        new MutationObserver(schedule).observe(reference, {childList: true, subtree: true, attributes: true});
+        if (window.jQuery) window.jQuery(reference).on('draw.dt column-sizing.dt', schedule);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+        align();
+        schedule();
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeDatasetAlignment);
+    } else {
+        initializeDatasetAlignment();
+    }
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    const expectedHeaders = [
+        'Method', 'Publication', 'Year', 'Ape', 'Soda', 'Vise', 'Soup', 'Camera', 'Can',
+        'Cat', 'Clown', 'Cube', 'Driller', 'Duck', 'Egg', 'Glue', 'Iron',
+        'Candy', 'Lamp', 'Phone', 'Squirrel', 'Avg.'
+    ];
+
+    function normalizeHeader(value) {
+        return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ').replace(/\.$/, '');
+    }
+
+    function parseDelimited(text, delimiter) {
+        const rows = [];
+        let row = [], field = '', quoted = false;
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+            if (quoted) {
+                if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+                else if (ch === '"') quoted = false;
+                else field += ch;
+            } else {
+                if (ch === '"') quoted = true;
+                else if (ch === delimiter) { row.push(field); field = ''; }
+                else if (ch === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+                else if (ch !== '\r') field += ch;
+            }
+        }
+        if (field.length || row.length) { row.push(field); rows.push(row); }
+        return rows.filter(r => r.some(v => String(v).trim() !== ''));
+    }
+
+    function detectDelimiter(text) {
+        const firstLine = text.split(/\r?\n/, 1)[0] || '';
+        const tabs = (firstLine.match(/\t/g) || []).length;
+        const commas = (firstLine.match(/,/g) || []).length;
+        return tabs > commas ? '\t' : ',';
+    }
+
+    function setStatus(message, type) {
+        const el = document.getElementById('import-status');
+        if (!el) return;
+        el.textContent = message;
+        el.className = type || '';
+    }
+
+    function recalculateRanks(tableId) {
+        const table = document.getElementById(tableId);
+        if (!table) return;
+        const dataTable = (window.jQuery && window.jQuery.fn.DataTable && window.jQuery.fn.DataTable.isDataTable('#' + tableId)) ? $('#' + tableId).DataTable() : null;
+        const rowNodes = dataTable ? dataTable.rows().nodes().toArray() : Array.from(table.tBodies[0].rows);
+        table.classList.add('import-ranks-updated');
+        const columnCount = expectedHeaders.length;
+
+        rowNodes.forEach(row => {
+            Array.from(row.cells).forEach((cell, idx) => {
+                if (idx < 3) return;
+                cell.classList.remove('top-rank', 'second-rank', 'third-rank');
+                Array.from(cell.querySelectorAll('b')).forEach(b => b.replaceWith(...b.childNodes));
+            });
+        });
+
+        for (let col = 3; col < columnCount; col++) {
+            const entries = [];
+            rowNodes.forEach(row => {
+                const methodCell = row.cells[0];
+                if (methodCell && methodCell.textContent.includes('(*)')) return;
+                const cell = row.cells[col];
+                if (!cell) return;
+                const raw = cell.textContent.trim();
+                if (!raw || raw === '-') return;
+                const value = Number(raw.replace(/%/g, '').trim());
+                if (Number.isFinite(value)) entries.push({ cell, value });
+            });
+            const distinct = Array.from(new Set(entries.map(e => e.value))).sort((a, b) => b - a).slice(0, 3);
+            entries.forEach(entry => {
+                const rank = distinct.indexOf(entry.value);
+                if (rank === 0) entry.cell.classList.add('top-rank');
+                else if (rank === 1) entry.cell.classList.add('second-rank');
+                else if (rank === 2) entry.cell.classList.add('third-rank');
+            });
+        }
+    }
+
+    function addRows(tableId, rows) {
+        const table = document.getElementById(tableId);
+        if (!table) throw new Error('Target table not found.');
+        const dt = (window.jQuery && window.jQuery.fn.DataTable && window.jQuery.fn.DataTable.isDataTable('#' + tableId)) ? $('#' + tableId).DataTable() : null;
+        rows.forEach(values => {
+            const tr = document.createElement('tr');
+            values.forEach(value => { const td = tr.insertCell(); td.textContent = value; });
+            if (dt) dt.row.add(tr);
+            else table.tBodies[0].appendChild(tr);
+        });
+        if (dt) dt.draw(false);
+        recalculateRanks(tableId);
+    }
+
+    function csvEscape(value) {
+        const s = String(value == null ? '' : value);
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+
+    function latexEscape(value) {
+        const replacements = {
+            '\\': '\\textbackslash{}',
+            '&': '\\&', '%': '\\%', '$': '\\$', '#': '\\#', '_': '\\_',
+            '{': '\\{', '}': '\\}', '~': '\\textasciitilde{}', '^': '\\textasciicircum{}'
+        };
+        return String(value == null ? '' : value).replace(/[\\&%$#_{}~^]/g, ch => replacements[ch]);
+    }
+
+    function getRowsInDisplayedOrder(tableId) {
+        const table = document.getElementById(tableId);
+        if (!table) return [];
+        const hasDataTable = window.jQuery && window.jQuery.fn.DataTable && window.jQuery.fn.DataTable.isDataTable('#' + tableId);
+        if (hasDataTable) {
+            return $('#' + tableId).DataTable().rows({ order: 'applied', search: 'applied' }).nodes().toArray();
+        }
+        return Array.from(table.tBodies[0].rows);
+    }
+
+    function latexCell(cell) {
+        let text = latexEscape(cell ? cell.textContent.trim() : '');
+        if (!cell) return text;
+        if (cell.classList.contains('top-rank')) return '\\cellcolor{FirstColor}\\textbf{' + text + '}';
+        if (cell.classList.contains('second-rank')) return '\\cellcolor{SecondColor}' + text;
+        if (cell.classList.contains('third-rank')) return '\\cellcolor{ThirdColor}' + text;
+        return text;
+    }
+
+    function buildLatexTable(tableId, caption) {
+        const table = document.getElementById(tableId);
+        if (!table) throw new Error('Target table not found.');
+        const rows = getRowsInDisplayedOrder(tableId);
+        const cols = expectedHeaders.length;
+        const alignment = 'lll' + 'r'.repeat(cols - 3);
+        const body = rows.map(row => {
+            const values = [];
+            for (let i = 0; i < cols; i++) values.push(latexCell(row.cells[i]));
+            return values.join(' & ') + ' \\\\';
+        }).join('\n');
+
+        return [
+            '\\documentclass{article}',
+            '\\usepackage[margin=1.2cm]{geometry}',
+            '\\usepackage{graphicx}',
+            '\\usepackage[table]{xcolor}',
+            '\\usepackage{booktabs}',
+            '\\usepackage{pdflscape}',
+            '\\definecolor{FirstColor}{HTML}{FFB3B3}',
+            '\\definecolor{SecondColor}{HTML}{FFD9B3}',
+            '\\definecolor{ThirdColor}{HTML}{FFFFB3}',
+            '\\begin{document}',
+            '\\begin{landscape}',
+            '\\begin{table}[htbp]',
+            '\\centering',
+            '\\caption{' + latexEscape(caption) + '}',
+            '\\resizebox{\\linewidth}{!}{%',
+            '\\begin{tabular}{' + alignment + '}',
+            '\\toprule',
+            expectedHeaders.map(latexEscape).join(' & ') + ' \\\\',
+            '\\midrule',
+            body,
+            '\\bottomrule',
+            '\\end{tabular}%',
+            '}',
+            '\\end{table}',
+            '\\end{landscape}',
+            '\\end{document}',
+            ''
+        ].join('\n');
+    }
+
+    function downloadLatex(tableId, caption, filename) {
+        // Recalculate rankings from the latest table contents immediately before export.
+        // This ensures rows added via CSV/TSV import are reflected in both values and rank colors.
+        recalculateRanks(tableId);
+        const latex = buildLatexTable(tableId, caption);
+        const blob = new Blob([latex], { type: 'application/x-tex;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    }
+
+    function addLatexDownloadLinks() {
+        const configs = [
+            ['table1', 'Performance Comparison - Regular scene', 'performance_regular_scene.tex'],
+            ['table2', 'Performance Comparison - Dynamic Light scene', 'performance_dynamic_light_scene.tex'],
+            ['table3', 'Performance Comparison - Noisy (+ Dynamic Light) scene', 'performance_noisy_dynamic_light_scene.tex'],
+            ['table4', 'Performance Comparison - Occlusion (+ Dynamic Light) scene', 'performance_occlusion_dynamic_light_scene.tex']
+        ];
+        configs.forEach(([tableId, caption, filename]) => {
+            const table = document.getElementById(tableId);
+            if (!table || document.querySelector('[data-latex-table="' + tableId + '"]')) return;
+            const link = document.createElement('a');
+            link.href = '#';
+            link.className = 'latex-download-link';
+            link.dataset.latexTable = tableId;
+            link.textContent = 'Download LaTeX (.tex)';
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                downloadLatex(tableId, caption, filename);
+            });
+            table.parentNode.insertBefore(link, table);
+        });
+    }
+
+    const ADMIN_PASSWORD_SHA256 = '580dcd13973988c3729676cc4a4d2f91b2e29c3223d0d1e1374101310cd99bf8';
+    const ADMIN_SESSION_KEY = 'mbt3d_admin_authenticated';
+
+    function isAdminAuthenticated() {
+        return sessionStorage.getItem(ADMIN_SESSION_KEY) === '1';
+    }
+
+    async function sha256Hex(text) {
+        const bytes = new TextEncoder().encode(text);
+        const digest = await crypto.subtle.digest('SHA-256', bytes);
+        return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function updateAdminUI() {
+        const panel = document.getElementById('data-upload-panel');
+        const button = document.getElementById('admin-access-button');
+        const status = document.getElementById('admin-access-status');
+        const loggedIn = isAdminAuthenticated();
+        if (panel) panel.style.display = loggedIn ? 'block' : 'none';
+        if (button) button.textContent = loggedIn ? 'Admin Logout' : 'Admin Login';
+        if (status) status.textContent = loggedIn ? 'Admin mode' : '';
+    }
+
+    async function handleAdminAccess() {
+        if (isAdminAuthenticated()) {
+            sessionStorage.removeItem(ADMIN_SESSION_KEY);
+            updateAdminUI();
+            return;
+        }
+        const password = window.prompt('Enter administrator password:');
+        if (password === null) return;
+        try {
+            const hash = await sha256Hex(password);
+            if (hash === ADMIN_PASSWORD_SHA256) {
+                sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
+                updateAdminUI();
+            } else {
+                window.alert('Incorrect administrator password.');
+            }
+        } catch (err) {
+            window.alert('Administrator authentication is unavailable in this browser.');
+        }
+    }
+
+    function requireAdmin() {
+        if (isAdminAuthenticated()) return true;
+        window.alert('Administrator login is required.');
+        updateAdminUI();
+        return false;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        addLatexDownloadLinks();
+        updateAdminUI();
+        const adminButton = document.getElementById('admin-access-button');
+        if (adminButton) adminButton.addEventListener('click', handleAdminAccess);
+        const importButton = document.getElementById('import-data-button');
+        const templateButton = document.getElementById('download-template-button');
+
+        if (templateButton) templateButton.addEventListener('click', function () {
+            if (!requireAdmin()) return;
+            const sample = expectedHeaders.map(csvEscape).join(',') + '\n' +
+                ['New method', 'Venue', '2026'].concat(Array(19).fill('')).map(csvEscape).join(',') + '\n';
+            const blob = new Blob([sample], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'rbot_performance_template.csv';
+            document.body.appendChild(a); a.click(); a.remove();
+            URL.revokeObjectURL(url);
+        });
+
+        if (importButton) importButton.addEventListener('click', function () {
+            if (!requireAdmin()) return;
+            const input = document.getElementById('data-file');
+            const targetId = document.getElementById('target-table').value;
+            const file = input && input.files ? input.files[0] : null;
+            if (!file) { setStatus('Please choose a CSV or TSV file.', 'error'); return; }
+            const reader = new FileReader();
+            reader.onload = function () {
+                try {
+                    const text = String(reader.result || '').replace(/^\uFEFF/, '');
+                    const delimiter = detectDelimiter(text);
+                    const parsed = parseDelimited(text, delimiter);
+                    if (parsed.length < 2) throw new Error('The file must contain a header row and at least one data row.');
+
+                    const inputHeaders = parsed[0].map(normalizeHeader);
+                    const headerIndex = {};
+                    inputHeaders.forEach((h, i) => { if (!(h in headerIndex)) headerIndex[h] = i; });
+                    const required = ['method', 'publication'];
+                    required.forEach(h => { if (!(h in headerIndex)) throw new Error('Missing required column: ' + h); });
+
+                    const outputRows = parsed.slice(1).map(r => {
+                        const values = expectedHeaders.map(h => {
+                            const idx = headerIndex[normalizeHeader(h)];
+                            return idx === undefined ? '' : String(r[idx] == null ? '' : r[idx]).trim();
+                        });
+                        const combined = values[1].match(/^(.*?)\s*\((\d{4})\)\s*$/);
+                        if (combined) {
+                            values[1] = combined[1].trim();
+                            if (!values[2]) values[2] = combined[2];
+                        }
+                        return values;
+                    }).filter(r => r.some(v => v !== ''));
+
+                    if (!outputRows.length) throw new Error('No data rows were found.');
+                    addRows(targetId, outputRows);
+                    setStatus(outputRows.length + ' row(s) added. First/Second/Third rankings were updated automatically.', 'success');
+
+                } catch (err) {
+                    setStatus(err && err.message ? err.message : 'Could not import the file.', 'error');
+                }
+            };
+            reader.onerror = function () { setStatus('Could not read the selected file.', 'error'); };
+            reader.readAsText(file);
+        });
+    });
+})();
+</script>
 </body>
 </html>
