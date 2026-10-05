@@ -14,6 +14,7 @@
     <script>
       window.addEventListener('resize', function() {
         const scaleBar = document.querySelector('.scale-bar');
+        if (!scaleBar) return;
         if (window.innerWidth <= 768) {
           scaleBar.style.display = 'block';
         } else {
@@ -179,17 +180,94 @@
         #import-status.error { color: #a32121; }
         .import-ranks-updated .top-rank { font-weight: bold; }
 
-        .latex-download-link {
-            float: right;
+        /* Controls never belong to a horizontally scrolling ancestor. */
+        .performance-table-container {
+            min-width: 0;
+            max-width: 100%;
+            overflow: visible;
+            white-space: normal;
+        }
+        .performance-table-toolbar {
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            width: 100%;
+            min-width: 0;
+            margin: 0 0 8px;
+            padding: 0;
+            white-space: nowrap;
+            line-height: 1.35;
+        }
+        .performance-length-control {
+            display: inline-flex;
+            flex: 0 0 auto;
+            align-items: center;
+            gap: 4px;
+            margin: 0;
+            padding: 0;
+            white-space: nowrap;
+        }
+        .performance-length-control select {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 4px;
+            border: 1px solid #aaa;
+            border-radius: 3px;
+            background-color: transparent;
+            color: inherit;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: normal;
+        }
+        .performance-table-toolbar .latex-download-link {
+            position: static;
+            float: none;
             display: inline-block;
-            margin: 4px 0 6px 12px;
+            flex: 0 0 auto;
+            margin: 0 0 0 auto;
+            padding: 0;
             font-weight: 500;
             color: #0366d6;
             text-decoration: none;
-            cursor: pointer;
             text-align: right;
+            white-space: nowrap;
+            cursor: pointer;
         }
         .latex-download-link:hover { text-decoration: underline; }
+        .performance-table-container .dataTables_wrapper {
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+        }
+        /* Only the table is inside this scrolling region; not controls or notes. */
+        .performance-table-scroll {
+            box-sizing: border-box;
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+        .performance-table-scroll > table {
+            width: 100%;
+            margin: 0 !important;
+            white-space: nowrap;
+        }
+        .performance-table-footer {
+            display: flow-root;
+            width: 100%;
+            margin-bottom: 6px;
+        }
+        @media (max-width: 768px) {
+            /* Fixed 170px side margins leave no room for one-line controls. */
+            body { margin-left: 16px; margin-right: 16px; overflow-wrap: anywhere; }
+            .performance-table-toolbar { gap: 8px; }
+        }
 
         /* GitHub Pages admin UI gate: convenience only, not server-side security. */
         #data-upload-panel { display: none; }
@@ -371,7 +449,20 @@
         <h2>## Performance Comparison (SR (%)). The best results are highlighted as <span style="background-color: #FFB3B3;"><b>First</b></span>, <span style="background-color: #FFD9B3;">Second</span>, and <span style="background-color: #FFFFB3;">Third</span>.</h2>
         <br>
         <h3># Regular scene</h3>
-    <div class="table-container">
+    <div class="performance-table-toolbar" data-toolbar-table="table1">
+        <label class="performance-length-control" for="table1_page_length">
+            Show
+            <select id="table1_page_length" name="table1_length" aria-controls="table1" disabled>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100" selected>100</option>
+            </select>
+            entries
+        </label>
+        <a href="#" class="latex-download-link" data-latex-table="table1">Download LaTeX (.tex)</a>
+    </div>
+    <div class="table-container performance-table-container">
         <table id="table1">
             <thead>
                <tr>
@@ -992,15 +1083,24 @@
             <li>The results were taken from [H. Huang et al.], CGF (2020).</li>
             <li>The results were taken from [N. Lv et al.], AEI (2024).</li>
         </ol>
-        <script type="text/javascript">
-        $(document).ready(function () {
-          $('#table1').DataTable({ pageLength: 100, order: [[2, 'desc']], searching: false });
-        });
-        </script>
+
     </div>
         <br>
         <h3># Dynamic Light scene</h3>
-    <div class="table-container">
+    <div class="performance-table-toolbar" data-toolbar-table="table2">
+        <label class="performance-length-control" for="table2_page_length">
+            Show
+            <select id="table2_page_length" name="table2_length" aria-controls="table2" disabled>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100" selected>100</option>
+            </select>
+            entries
+        </label>
+        <a href="#" class="latex-download-link" data-latex-table="table2">Download LaTeX (.tex)</a>
+    </div>
+    <div class="table-container performance-table-container">
         <table id="table2">
             <thead>
                <tr>
@@ -1621,15 +1721,25 @@
             <li>The results were taken from [H. Huang et al.], CGF (2020).</li>
             <li>The results were taken from [N. Lv et al.], AEI (2024).</li>
         </ol>
-        <script type="text/javascript">
-        $(document).ready(function () {
-          $('#table2').DataTable({ pageLength: 100, order: [[2, 'desc']], searching: false });
-        });
-    </script>
+
     </div>
+        
         <br>
         <h3># Noisy (+ Dyanmic Light) scene</h3>
-    <div class="table-container">    
+    <div class="performance-table-toolbar" data-toolbar-table="table3">
+        <label class="performance-length-control" for="table3_page_length">
+            Show
+            <select id="table3_page_length" name="table3_length" aria-controls="table3" disabled>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100" selected>100</option>
+            </select>
+            entries
+        </label>
+        <a href="#" class="latex-download-link" data-latex-table="table3">Download LaTeX (.tex)</a>
+    </div>
+    <div class="table-container performance-table-container">
         <table id="table3">
             <thead>
                   <tr>
@@ -2250,15 +2360,25 @@
             <li>The results were taken from [H. Huang et al.], CGF (2020).</li>
             <li>The results were taken from [N. Lv et al.], AEI (2024).</li>
         </ol>
-        <script type="text/javascript">
-        $(document).ready(function () {
-          $('#table3').DataTable({ pageLength: 100, order: [[2, 'desc']], searching: false });
-        });
-        </script>
+
     </div>
+        
         <br>
         <h3># Occlusion (+ Dynamic Light) scene</h3>
-    <div class="table-container">    
+    <div class="performance-table-toolbar" data-toolbar-table="table4">
+        <label class="performance-length-control" for="table4_page_length">
+            Show
+            <select id="table4_page_length" name="table4_length" aria-controls="table4" disabled>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100" selected>100</option>
+            </select>
+            entries
+        </label>
+        <a href="#" class="latex-download-link" data-latex-table="table4">Download LaTeX (.tex)</a>
+    </div>
+    <div class="table-container performance-table-container">
         <table id="table4">
             <thead>
                 <tr>
@@ -2879,11 +2999,7 @@
             <li>The results were taken from [H. Huang et al.], CGF (2020).</li>
             <li>The results were taken from [N. Lv et al.], AEI (2024).</li>
         </ol>
-        <script type="text/javascript">
-        $(document).ready(function () {
-          $('#table4').DataTable({ pageLength: 100, order: [[2, 'desc']], searching: false });
-        });
-        </script>
+
     </div>
 <br>
 <hr>
@@ -2937,7 +3053,7 @@ shfts, JEI (2025).</li>
         const reference = document.getElementById('table1');
         if (!dataset || !reference) return;
         const datasetContainer = dataset.closest('.table-container');
-        const referenceContainer = reference.closest('.table-container');
+        const referenceContainer = reference.closest('.performance-table-scroll, .table-container');
         const datasetHeading = datasetContainer.previousElementSibling;
         const performanceHeading = Array.from(document.querySelectorAll('h2'))
             .find(heading => heading.textContent.includes('Performance Comparison'));
@@ -3000,11 +3116,8 @@ shfts, JEI (2025).</li>
         align();
         schedule();
     }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeDatasetAlignment);
-    } else {
-        initializeDatasetAlignment();
-    }
+    // The reference scroller is created by DataTables during initialization.
+    document.addEventListener('mbt3d:tables-ready', initializeDatasetAlignment, { once: true });
 })();
 </script>
 <script type="text/javascript">
@@ -3197,6 +3310,54 @@ shfts, JEI (2025).</li>
         URL.revokeObjectURL(url);
     }
 
+    function initializePerformanceTables() {
+        const hasDataTables = window.jQuery && window.jQuery.fn.DataTable;
+        ['table1', 'table2', 'table3', 'table4'].forEach(tableId => {
+            const table = document.getElementById(tableId);
+            const select = document.getElementById(tableId + '_page_length');
+            if (!table || !select) return;
+
+            if (hasDataTables) {
+                const dt = window.jQuery(table).DataTable({
+                    pageLength: 100,
+                    order: [[2, 'desc']],
+                    searching: false,
+                    // The length selector lives in the static toolbar above the wrapper.
+                    // Do not generate a second selector with the default "l" DOM token.
+                    dom: '<"performance-table-scroll"t><"performance-table-footer"ip>',
+                    initComplete: function () {
+                        select.value = String(this.api().page.len());
+                        select.disabled = false;
+                    }
+                });
+                select.addEventListener('change', function () {
+                    dt.page.len(Number(select.value)).draw();
+                });
+                window.jQuery(table).on('length.dt', function (event, settings, length) {
+                    select.value = String(length);
+                });
+            } else {
+                // Keep the table and export usable if the external CDN is unavailable.
+                // Pagination remains disabled because it needs DataTables.
+                let scroller = table.parentElement;
+                if (!scroller.classList.contains('performance-table-scroll')) {
+                    scroller = document.createElement('div');
+                    scroller.className = 'performance-table-scroll';
+                    table.parentNode.insertBefore(scroller, table);
+                    scroller.appendChild(table);
+                }
+                select.title = 'Page-size selection requires the DataTables library to load.';
+            }
+            const scroller = table.closest('.performance-table-scroll');
+            if (scroller) {
+                scroller.tabIndex = 0;
+                scroller.setAttribute('role', 'region');
+                scroller.setAttribute('aria-label', 'Performance comparison table: horizontal scroll');
+            }
+        });
+        document.dispatchEvent(new Event('mbt3d:tables-ready'));
+    }
+
     function addLatexDownloadLinks() {
         const configs = [
             ['table1', 'Performance Comparison - Regular scene', 'performance_regular_scene.tex'],
@@ -3205,28 +3366,14 @@ shfts, JEI (2025).</li>
             ['table4', 'Performance Comparison - Occlusion (+ Dynamic Light) scene', 'performance_occlusion_dynamic_light_scene.tex']
         ];
         configs.forEach(([tableId, caption, filename]) => {
-            const table = document.getElementById(tableId);
-            if (!table || document.querySelector('[data-latex-table="' + tableId + '"]')) return;
-            const link = document.createElement('a');
-            link.href = '#';
-            link.className = 'latex-download-link';
-            link.dataset.latexTable = tableId;
-            link.textContent = 'Download LaTeX (.tex)';
+            // Bind the existing link; never move it according to initialization timing.
+            const link = document.querySelector('[data-latex-table="' + tableId + '"]');
+            if (!link || link.dataset.downloadBound === 'true') return;
+            link.dataset.downloadBound = 'true';
             link.addEventListener('click', function (event) {
                 event.preventDefault();
                 downloadLatex(tableId, caption, filename);
             });
-            const wrapper = document.getElementById(tableId + '_wrapper');
-            if (wrapper) {
-                const lengthControl = wrapper.querySelector('.dataTables_length');
-                if (lengthControl) {
-                    lengthControl.insertAdjacentElement('afterend', link);
-                } else {
-                    wrapper.insertBefore(link, wrapper.firstChild);
-                }
-            } else {
-                table.parentNode.insertBefore(link, table);
-            }
         });
     }
 
@@ -3282,6 +3429,7 @@ shfts, JEI (2025).</li>
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        initializePerformanceTables();
         addLatexDownloadLinks();
         updateAdminUI();
         const adminButton = document.getElementById('admin-access-button');
