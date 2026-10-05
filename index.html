@@ -34,7 +34,7 @@
             margin-right: 170px; /* Add right margin */
         }
         h1 {
-            font-size: 40px;
+            font-size: 35px;
             padding-bottom: 10px;
             border-bottom: 1px solid #eaecef;
         }
@@ -180,12 +180,14 @@
         .import-ranks-updated .top-rank { font-weight: bold; }
 
         .latex-download-link {
-            display: inline-block;
-            margin: 4px 0 10px;
+            display: block;
+            width: fit-content;
+            margin: 0 0 6px 0;
             font-weight: 500;
             color: #0366d6;
             text-decoration: none;
             cursor: pointer;
+            text-align: left;
         }
         .latex-download-link:hover { text-decoration: underline; }
 
@@ -366,9 +368,9 @@
     </div>
     <br>   
         <!-- Method comparison tables -->
-        <h2>## Performance Comparison (SR (%)): The best results are highlighted as <span style="background-color: #FFB3B3;"><b>First</b></span>, <span style="background-color: #FFD9B3;">Second</span>, and <span style="background-color: #FFFFB3;">Third</span>.</h2>        
-	    <br>
-		<h3># Regular scene</h3>
+        <h2>## Performance Comparison (SR (%)). The best results are highlighted as <span style="background-color: #FFB3B3;"><b>First</b></span>, <span style="background-color: #FFD9B3;">Second</span>, and <span style="background-color: #FFFFB3;">Third</span>.</h2>
+        <br>
+        <h3># Regular scene</h3>
     <div class="table-container">
         <table id="table1">
             <thead>
@@ -996,6 +998,7 @@
         });
         </script>
     </div>
+        <br>
         <h3># Dynamic Light scene</h3>
     <div class="table-container">
         <table id="table2">
@@ -1624,7 +1627,7 @@
         });
     </script>
     </div>
-        
+        <br>
         <h3># Noisy (+ Dyanmic Light) scene</h3>
     <div class="table-container">    
         <table id="table3">
@@ -2253,7 +2256,7 @@
         });
         </script>
     </div>
-        
+        <br>
         <h3># Occlusion (+ Dynamic Light) scene</h3>
     <div class="table-container">    
         <table id="table4">
